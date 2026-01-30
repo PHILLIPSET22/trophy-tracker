@@ -1,0 +1,153 @@
+/* --- Global Styles --- */
+:root {
+    --ps-dark: #0a0a0a;
+    --ps-card: #1a1a1b;
+    --ps-blue: #00439c;
+    --ps-light-blue: #0072ce;
+    --ps-text: #f0f0f0;
+    --ps-muted: #a0a0a0;
+    --ps-gold: #e2b007;
+    --ps-danger: #ff4d4d;
+}
+
+body {
+    background-color: var(--ps-dark);
+    color: var(--ps-text);
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+}
+
+h1, h2, h3 {
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-weight: 800;
+}
+
+/* --- Header & Navigation --- */
+header {
+    background: linear-gradient(135deg, var(--ps-blue) 0%, #001e44 100%);
+    padding: 2rem 1rem;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+}
+
+nav {
+    background: #111;
+    padding: 1rem;
+    text-align: center;
+    border-bottom: 2px solid var(--ps-blue);
+    margin-bottom: 2rem;
+}
+
+nav a {
+    color: var(--ps-muted);
+    text-decoration: none;
+    margin: 0 15px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: color 0.3s ease;
+}
+
+nav a:hover {
+    color: var(--ps-light-blue);
+}
+
+/* --- Game Cards (Lists) --- */
+#backlogContainer, #progressContainer, #platinumContainer {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.game-item {
+    background: var(--ps-card);
+    border-left: 4px solid var(--ps-blue);
+    margin-bottom: 1rem;
+    padding: 1.5rem;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    transition: transform 0.2s ease;
+}
+
+.game-item:hover {
+    transform: translateX(5px);
+    border-left-color: var(--ps-light-blue);
+}
+
+.game-info {
+    flex-grow: 1;
+}
+
+.game-title {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #fff;
+    display: block;
+}
+
+.game-stats {
+    font-size: 0.9rem;
+    color: var(--ps-muted);
+}
+
+/* --- Buttons --- */
+button {
+    background: #2a2a2c;
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    transition: background 0.2s ease;
+    margin-left: 10px;
+}
+
+button:hover {
+    background: #444;
+}
+
+/* Specific Button Colors */
+.del-btn, button[onclick*="delete"] {
+    color: var(--ps-danger) !important;
+}
+
+button[onclick*="Platinumed"], button[onclick*="moveToPlatinum"] {
+    border: 1px solid var(--ps-gold);
+    color: var(--ps-gold);
+}
+
+button[onclick*="Platinumed"]:hover {
+    background: var(--ps-gold);
+    color: #000;
+}
+
+/* --- Forms (Input Page) --- */
+.input-group {
+    max-width: 500px;
+    margin: 20px auto;
+    background: var(--ps-card);
+    padding: 2rem;
+    border-radius: 12px;
+}
+
+input, select {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0 20px 0;
+    background: #000;
+    border: 1px solid #333;
+    color: #fff;
+    border-radius: 6px;
+}
+
+input:focus {
+    border-color: var(--ps-light-blue);
+    outline: none;
+}

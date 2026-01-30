@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>In-Progress - SaxPlayingSpider</title>
+    <link rel="stylesheet" href="../styles.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#0a0a0a] text-[#f0f0f0]">
+
+    <header class="bg-gradient-to-br from-[#00439c] to-[#001e44] text-center py-10 px-4 shadow-2xl border-b border-[#0072ce]/30">
+        <h1 class="text-4xl font-extrabold italic tracking-widest text-white uppercase">Currently Playing</h1>
+        <p class="text-blue-300 mt-2 font-medium opacity-80">SaxPlayingSpider</p>
+    </header>
+
+    <nav class="bg-[#111] py-4 text-center border-b-2 border-[#00439c] mb-8">
+        <a href="../dashboard.html" class="text-[#a0a0a0] hover:text-[#0072ce] mx-4 font-bold uppercase text-xs tracking-widest transition-colors">Dashboard</a>
+        <a href="../backlog/backlog.html" class="text-[#a0a0a0] hover:text-[#0072ce] mx-4 font-bold uppercase text-xs tracking-widest transition-colors">Backlog</a>
+        <a href="../platinums/platinums.html" class="text-[#a0a0a0] hover:text-[#0072ce] mx-4 font-bold uppercase text-xs tracking-widest transition-colors">Platinumed</a>
+        <a href="../input-data/input-data.html" class="text-[#a0a0a0] hover:text-[#0072ce] mx-4 font-bold uppercase text-xs tracking-widest transition-colors">Add New Game</a>
+    </nav>
+
+    <main class="max-w-4xl mx-auto px-4">
+        <div id="progressContainer" class="space-y-6">
+            </div>
+    </main>
+
+    <script>
+        const psnId = "SaxPlayingSpider";
+
+        function displayProgress() {
+            const rawData = localStorage.getItem(psnId);
+            const data = rawData ? JSON.parse(rawData) : { backlog: [], inProgress: [], platinumed: [] };
+            
+            const container = document.getElementById('progressContainer');
+            container.innerHTML = "";
+
+            if (data.inProgress && data.inProgress.length > 0) {
+                data.inProgress.forEach((game, index) => {
+                    // Calculate percentage for a progress bar
+                    const percent = Math.round((game.earned / game.total) * 100) || 0;
+                    
+                    const gameDiv = document.createElement('div');
+                    gameDiv.className = 'bg-[#1a1a1b] p-6 rounded-xl border-l-4 border-[#0072ce] shadow-lg';
+                    
+                    gameDiv.innerHTML = `
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="game-info">
+                                <span class="game-title text-xl font-bold text-white block">${game.title}</span>
+                                <span class="text-[#0072ce] text-sm font-black tracking-tighter">${percent}% COMPLETE</span>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button onclick="moveToPlatinum(${index})" class="px-3 py-1.5 bg-[#1a1a1b] text-[#e2b007] border border-[#e2b007] font-bold rounded hover:bg-[#e2b007] hover:text-black transition-all uppercase text-[10px]">
+                                    [Platinumed?]
+                                </button>
+                                <button onclick="deleteGame(${index})" class="px-3 py-1.5 bg-[#2a2a2c] text-[#ff4d4d] font-bold rounded hover:bg-[#333] transition-colors uppercase text-[10px]">
+                                    [Delete]
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="w-full bg-[#0a0a0a] rounded-full h-2 overflow-hidden border border-gray-800">
+                            <div class="bg-[#0072ce] h-full transition-all duration-500" style="width: ${percent}%"></div>
+                        </div>
+                        <p class="text-[#a0a0a0] text-xs mt-2 italic text-right">${game.earned} of ${game.total} Trophies Earned</p>
+                    `;
+                    container.appendChild(gameDiv);
+                });
+            } else {
+                container.innerHTML = `
+                    <div class="text-center p-12 bg-[#1a1a1b] rounded-xl border-2 border-dashed border-gray-800">
+                        <p class="text-gray-500 italic">No games currently being played. Pick something from your backlog!</p>
+                    </div>`;
+            }
+        }
+
+        window.deleteGame = function(index) {
+            if(confirm("Stop tracking progress for this game?")) {
+                let data = JSON.parse(localStorage.getItem(psnId));
+                data.inProgress.splice(index, 1);
+                localStorage.setItem(psnId, JSON.stringify(data));
+                displayProgress();
+            }
+        };
+
+        window.moveToPlatinum = function(index) {
+            let data = JSON.parse(localStorage.getItem(psnId));
+            const gameToMove = data.inProgress.splice(index, 1)[0];
+            
+            // Auto-complete trophies if moving to Platinum
+            gameToMove.earned = gameToMove.total;
+
+            if (!data.platinumed) data.platinumed = [];
+            data.platinumed.push(gameToMove);
+            
+            localStorage.setItem(psnId, JSON.stringify(data));
+            displayProgress();
+            
+            alert(`🏆 Achievement Unlocked: ${gameToMove.title} Platinumed!`);
+        };
+
+        displayProgress();
+    </script>
+</body>
+</html>

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Trophies Dashboard</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <link rel="stylesheet" href="styles.css">
+    </head>
+
+    <body class="bg-[#0a0a0a] text-[#f0f0f0]">
+
+        <header class="bg-gradient-to-br from-[#00439c] to-[#001e44] text-center py-10 px-4 shadow-2xl border-b border-[#0072ce]/30">
+            <h1 class="text-4xl font-extrabold italic tracking-widest text-white uppercase">Trophy Tracker</h1>
+            <p class="text-blue-300 mt-2 font-medium opacity-80">SaxPlayingSpider</p>
+            <p id="platinum-count" class="mt-4 inline-block px-6 py-1.5 bg-[#1a1a1b] text-[#e2b007] rounded-full text-xs font-black border border-[#e2b007] tracking-widest uppercase">
+                Currently Has: 0 Platinums
+            </p>
+        </header>
+
+        <main class="max-w-6xl mx-auto px-4 py-12">
+            
+            <section class="grid grid-cols-2 md:grid-cols-4 gap-8 justify-items-center mb-16">
+
+                <a href="input-data/input-data.html" class="group text-center">
+                    <img src="assets/input-data.png" alt="New Game" class="w-32 h-32 md:w-40 md:h-40 object-cover rounded-xl shadow-lg group-hover:scale-105 group-hover:shadow-[#0072ce]/50 transition-all duration-300">
+                    <p class="mt-4 font-bold text-[#0072ce] group-hover:text-white transition-colors">Input Game</p>
+                </a>
+
+                <a href="backlog/backlog.html" class="group text-center">
+                    <img src="assets/backlog.png" alt="Backlog" class="w-32 h-32 md:w-40 md:h-40 object-cover rounded-xl shadow-lg group-hover:scale-105 group-hover:shadow-[#0072ce]/50 transition-all duration-300">
+                    <p class="mt-4 font-bold text-[#0072ce] group-hover:text-white transition-colors">Backlog</p>
+                </a>
+
+                <a href="in-progress/in-progress.html" class="group text-center">
+                    <img src="assets/in-progress.png" alt="In-Progress" class="w-32 h-32 md:w-40 md:h-40 object-cover rounded-xl shadow-lg group-hover:scale-105 group-hover:shadow-[#0072ce]/50 transition-all duration-300">
+                    <p class="mt-4 font-bold text-[#0072ce] group-hover:text-white transition-colors">In-Progress</p>
+                </a>
+
+                <a href="platinums/platinums.html" class="group text-center">
+                    <img src="assets/platinum-logo.png" alt="platinum-logo" class="w-32 h-32 md:w-40 md:h-40 object-cover rounded-xl shadow-lg group-hover:scale-105 group-hover:shadow-[#e2b007]/50 transition-all duration-300">
+                    <p class="mt-4 font-bold text-[#0072ce] group-hover:text-white transition-colors">Platinumed</p>
+                </a>
+
+            </section>
+
+            <section id="stats-summary" class="bg-[#1a1a1b] p-8 rounded-2xl shadow-2xl border border-gray-800">
+                <h2 class="text-xl font-bold mb-8 text-white uppercase tracking-wider border-b border-gray-800 pb-4">Collection Overview</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8" id="stats-content">
+                    </div>
+            </section>
+
+        </main>
+
+        <script>
+            function updateDashboard() {
+                const psnId = "SaxPlayingSpider";
+                const rawData = localStorage.getItem(psnId);
+                const data = rawData ? JSON.parse(rawData) : { backlog: [], inProgress: [], platinumed: [] };
+
+                const statsContent = document.getElementById('stats-content');
+                const platHeader = document.getElementById('platinum-count');
+
+                // Standardize keys (Input page uses inProgress)
+                if (!data.inProgress) data.inProgress = [];
+                if (!data.backlog) data.backlog = [];
+                if (!data.platinumed) data.platinumed = [];
+
+                const totalGames = data.backlog.length + data.inProgress.length + data.platinumed.length;
+                platHeader.innerText = `Currently Has: ${data.platinumed.length} Platinums`;
+
+                if (totalGames === 0) {
+                    statsContent.innerHTML = `<div class="col-span-1 md:col-span-3 p-12 text-center bg-[#0a0a0a] rounded-xl border-2 border-dashed border-gray-800"><p class="text-gray-500 italic">No game data found.</p></div>`;
+                    return;
+                }
+
+                function getTotals(list) {
+                    let earned = 0, total = 0;
+                    list.forEach(g => {
+                        earned += Number(g.earned || 0);
+                        total += Number(g.total || 0);
+                    });
+                    return { earned, total, count: list.length };
+                }
+
+                const b = getTotals(data.backlog);
+                const i = getTotals(data.inProgress);
+                const p = getTotals(data.platinumed);
+
+                statsContent.innerHTML = `
+                    <div class="p-6 bg-[#0a0a0a] rounded-xl border-l-4 border-[#00439c]">
+                        <p class="text-xs text-[#a0a0a0] uppercase font-bold tracking-widest">Backlog</p>
+                        <p class="text-3xl font-black text-white">${b.count}</p>
+                        <p class="text-[#a0a0a0] text-sm mt-2">${b.count > 0 ? b.earned + ' / ' + b.total : '---'}</p>
+                    </div>
+                    <div class="p-6 bg-[#0a0a0a] rounded-xl border-l-4 border-[#0072ce]">
+                        <p class="text-xs text-[#a0a0a0] uppercase font-bold tracking-widest">In-Progress</p>
+                        <p class="text-3xl font-black text-white">${i.count}</p>
+                        <p class="text-[#a0a0a0] text-sm mt-2">${i.count > 0 ? i.earned + ' / ' + i.total : '---'}</p>
+                    </div>
+                    <div class="p-6 bg-[#001e44] rounded-xl border border-[#0072ce]/30">
+                        <p class="text-xs text-[#0072ce] uppercase font-bold tracking-widest">Total Trophies</p>
+                        <p class="text-3xl font-black text-white">${b.earned + i.earned + p.earned}</p>
+                        <p class="text-blue-300 text-sm mt-2 font-bold">${totalGames} Games Total</p>
+                    </div>
+                `;
+            }
+            window.onload = updateDashboard;
+        </script>
+    </body>
+</html>

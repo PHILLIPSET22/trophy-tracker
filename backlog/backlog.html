@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Backlog - SaxPlayingSpider</title>
+    <link rel="stylesheet" href="../styles.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#0a0a0a] text-[#f0f0f0]">
+
+    <header class="bg-gradient-to-br from-[#00439c] to-[#001e44] text-center py-10 px-4 shadow-2xl border-b border-[#0072ce]/30">
+        <h1 class="text-4xl font-extrabold italic tracking-widest text-white uppercase">Game Backlog</h1>
+        <p class="text-blue-300 mt-2 font-medium opacity-80">SaxPlayingSpider</p>
+    </header>
+
+    <nav class="bg-[#111] py-4 text-center border-b-2 border-[#00439c] mb-8">
+        <a href="../dashboard.html" class="text-[#a0a0a0] hover:text-[#0072ce] mx-4 font-bold uppercase text-xs tracking-widest transition-colors">Dashboard</a>
+        <a href="../input-data/input-data.html" class="text-[#a0a0a0] hover:text-[#0072ce] mx-4 font-bold uppercase text-xs tracking-widest transition-colors">Add New Game</a>
+        <a href="../in-progress/in-progress.html" class="text-[#a0a0a0] hover:text-[#0072ce] mx-4 font-bold uppercase text-xs tracking-widest transition-colors">In-Progress</a>
+        <a href="../platinums/platinums.html" class="text-[#a0a0a0] hover:text-[#0072ce] mx-4 font-bold uppercase text-xs tracking-widest transition-colors">Platinumed</a>
+    </nav>
+
+    <main class="max-w-4xl mx-auto px-4">
+        <div id="backlogContainer" class="space-y-4">
+            </div>
+    </main>
+
+    <script>
+        const psnId = "SaxPlayingSpider";
+
+        function displayBacklog() {
+            const rawData = localStorage.getItem(psnId);
+            const data = rawData ? JSON.parse(rawData) : { backlog: [], inProgress: [], platinumed: [] };
+            
+            const container = document.getElementById('backlogContainer');
+            container.innerHTML = "";
+
+            if (data.backlog && data.backlog.length > 0) {
+                data.backlog.forEach((game, index) => {
+                    const gameDiv = document.createElement('div');
+                    // Matches the Dark Card style from the Dashboard
+                    gameDiv.className = 'game-item flex justify-between items-center bg-[#1a1a1b] p-6 rounded-xl border-l-4 border-[#00439c] shadow-lg';
+                    
+                    gameDiv.innerHTML = `
+                        <div class="game-info">
+                            <span class="game-title text-xl font-bold text-white block">${game.title}</span>
+                            <span class="game-stats text-[#a0a0a0] text-sm italic">Trophies: ${game.earned} / ${game.total}</span>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button onclick="moveGame(${index}, 'inProgress')" class="px-4 py-2 bg-[#00439c] text-white font-bold rounded hover:bg-[#0072ce] transition-all uppercase text-xs tracking-tighter">
+                                [Start Playing]
+                            </button>
+                            <button onclick="deleteGame(${index})" class="px-4 py-2 bg-[#2a2a2c] text-[#ff4d4d] font-bold rounded hover:bg-[#333] transition-colors uppercase text-xs tracking-tighter">
+                                [Delete]
+                            </button>
+                        </div>
+                    `;
+                    container.appendChild(gameDiv);
+                });
+            } else {
+                container.innerHTML = `
+                    <div class="text-center p-12 bg-[#1a1a1b] rounded-xl border-2 border-dashed border-gray-800">
+                        <p class="text-gray-500 italic">Your backlog is clear. Time to find a new adventure!</p>
+                    </div>`;
+            }
+        }
+
+        window.deleteGame = function(index) {
+            if(confirm("Remove this game from your backlog?")) {
+                let data = JSON.parse(localStorage.getItem(psnId));
+                data.backlog.splice(index, 1);
+                localStorage.setItem(psnId, JSON.stringify(data));
+                displayBacklog();
+            }
+        };
+
+        window.moveGame = function(index, target) {
+            let data = JSON.parse(localStorage.getItem(psnId));
+            if (data && data.backlog) {
+                const gameToMove = data.backlog.splice(index, 1)[0];
+                
+                // Ensure target key exists (using camelCase to match Dashboard)
+                if (!data[target]) data[target] = [];
+                
+                data[target].push(gameToMove);
+                localStorage.setItem(psnId, JSON.stringify(data));
+                displayBacklog();
+            }
+        };
+
+        // Initial Load
+        displayBacklog();
+    </script>
+</body>
+</html>

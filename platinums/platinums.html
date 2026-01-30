@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Platinum Collection - SaxPlayingSpider</title>
+    <link rel="stylesheet" href="../styles.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#0a0a0a] text-[#f0f0f0]">
+
+    <header class="bg-gradient-to-br from-[#00439c] to-[#001e44] text-center py-10 px-4 shadow-2xl border-b border-[#0072ce]/30">
+        <h1 class="text-4xl font-extrabold italic tracking-widest text-white uppercase">Platinum Collection 🏆</h1>
+        <p class="text-blue-300 mt-2 font-medium opacity-80">SaxPlayingSpider</p>
+    </header>
+
+    <nav class="bg-[#111] py-4 text-center border-b-2 border-[#00439c] mb-8">
+        <a href="../dashboard.html" class="text-[#a0a0a0] hover:text-[#0072ce] mx-4 font-bold uppercase text-xs tracking-widest transition-colors">Dashboard</a>
+        <a href="../backlog/backlog.html" class="text-[#a0a0a0] hover:text-[#0072ce] mx-4 font-bold uppercase text-xs tracking-widest transition-colors">Backlog</a>
+        <a href="../in-progress/in-progress.html" class="text-[#a0a0a0] hover:text-[#0072ce] mx-4 font-bold uppercase text-xs tracking-widest transition-colors">In-Progress</a>
+        <a href="../input-data/input-data.html" class="text-[#a0a0a0] hover:text-[#0072ce] mx-4 font-bold uppercase text-xs tracking-widest transition-colors">Add New Game</a>
+    </nav>
+
+    <main class="max-w-4xl mx-auto px-4">
+        <div id="platinumContainer" class="space-y-4">
+            </div>
+    </main>
+
+    <script>
+        const psnId = "SaxPlayingSpider";
+
+        function displayPlatinums() {
+            const rawData = localStorage.getItem(psnId);
+            const data = rawData ? JSON.parse(rawData) : { backlog: [], inProgress: [], platinumed: [] };
+            
+            const container = document.getElementById('platinumContainer');
+            container.innerHTML = "";
+
+            if (data.platinumed && data.platinumed.length > 0) {
+                data.platinumed.forEach((game, index) => {
+                    const gameDiv = document.createElement('div');
+                    // Using your 'game-item' class from styles.css
+                    gameDiv.className = 'game-item flex justify-between items-center bg-[#1a1a1b] p-6 rounded-xl border-l-4 border-[#e2b007] shadow-lg';
+                    
+                    gameDiv.innerHTML = `
+                        <div class="game-info">
+                            <span class="game-title text-xl font-bold text-white block">${game.title}</span>
+                            <span class="game-stats text-[#a0a0a0] text-sm italic">Trophies: ${game.earned} / ${game.total}</span>
+                        </div>
+                        <button class="del-btn px-4 py-2 bg-[#2a2a2c] text-[#ff4d4d] font-bold rounded hover:bg-[#333] transition-colors uppercase text-xs tracking-tighter" data-index="${index}">
+                            [Delete]
+                        </button>
+                    `;
+                    container.appendChild(gameDiv);
+                });
+
+                setupDeleteListeners();
+            } else {
+                container.innerHTML = `
+                    <div class="text-center p-12 bg-[#1a1a1b] rounded-xl border-2 border-dashed border-gray-800">
+                        <p class="text-gray-500 italic">No Platinums yet. The grind never stops.</p>
+                    </div>`;
+            }
+        }
+
+        function setupDeleteListeners() {
+            const buttons = document.querySelectorAll('.del-btn');
+            buttons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const index = parseInt(this.getAttribute('data-index'));
+                    deleteItem(index);
+                });
+            });
+        }
+
+        function deleteItem(index) {
+            if(confirm("Are you sure you want to remove this trophy from your collection?")) {
+                let data = JSON.parse(localStorage.getItem(psnId));
+                data.platinumed.splice(index, 1);
+                localStorage.setItem(psnId, JSON.stringify(data));
+                displayPlatinums();
+            }
+        }
+
+        displayPlatinums();
+    </script>
+</body>
+</html>

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Game - SaxPlayingSpider</title>
+    <link rel="stylesheet" href="../styles.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#0a0a0a] text-[#f0f0f0]">
+
+    <header class="bg-gradient-to-br from-[#00439c] to-[#001e44] text-center py-10 px-4 shadow-2xl border-b border-[#0072ce]/30">
+        <h1 class="text-4xl font-extrabold italic tracking-widest text-white uppercase">Add Game Data</h1>
+        <p class="text-blue-300 mt-2 font-medium opacity-80">SaxPlayingSpider</p>
+    </header>
+
+    <nav class="bg-[#111] py-4 text-center border-b-2 border-[#00439c] mb-8">
+        <a href="../dashboard.html" class="text-[#a0a0a0] hover:text-[#0072ce] mx-4 font-bold uppercase text-xs tracking-widest transition-colors">Dashboard</a>
+        <a href="../backlog/backlog.html" class="text-[#a0a0a0] hover:text-[#0072ce] mx-4 font-bold uppercase text-xs tracking-widest transition-colors">Backlog</a>
+        <a href="../in-progress/in-progress.html" class="text-[#a0a0a0] hover:text-[#0072ce] mx-4 font-bold uppercase text-xs tracking-widest transition-colors">In-Progress</a>
+        <a href="../platinums/platinums.html" class="text-[#a0a0a0] hover:text-[#0072ce] mx-4 font-bold uppercase text-xs tracking-widest transition-colors">Platinumed</a>
+    </nav>
+
+    <main class="max-w-xl mx-auto px-6">
+        <div class="bg-[#1a1a1b] p-8 rounded-2xl shadow-2xl border border-gray-800">
+            <div class="space-y-6">
+                <div>
+                    <label class="block text-xs font-black uppercase tracking-widest text-blue-400 mb-2">Game Title</label>
+                    <input type="text" id="gameTitle" placeholder="e.g. Elden Ring" 
+                        class="w-full bg-[#0a0a0a] border border-gray-800 rounded-lg p-3 text-white focus:border-[#0072ce] focus:ring-1 focus:ring-[#0072ce] outline-none transition-all">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-black uppercase tracking-widest text-blue-400 mb-2">Earned</label>
+                        <input type="number" id="trophiesEarned" placeholder="0" 
+                            class="w-full bg-[#0a0a0a] border border-gray-800 rounded-lg p-3 text-white focus:border-[#0072ce] outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-black uppercase tracking-widest text-blue-400 mb-2">Total</label>
+                        <input type="number" id="totalTrophies" placeholder="50" 
+                            class="w-full bg-[#0a0a0a] border border-gray-800 rounded-lg p-3 text-white focus:border-[#0072ce] outline-none">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-black uppercase tracking-widest text-blue-400 mb-2">Status</label>
+                    <select id="pageSelect" class="w-full bg-[#0a0a0a] border border-gray-800 rounded-lg p-3 text-white focus:border-[#0072ce] outline-none appearance-none">
+                        <option value="backlog">Backlog</option>
+                        <option value="inProgress">In-Progress</option>
+                        <option value="platinumed">Platinumed</option>
+                    </select>
+                </div>
+
+                <button id="saveBtn" class="w-full bg-[#00439c] hover:bg-[#0072ce] text-white font-black py-4 rounded-xl shadow-lg shadow-blue-900/20 uppercase tracking-widest transition-all active:scale-95">
+                    Save to Collection
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.getElementById('saveBtn').addEventListener('click', function() {
+            const psnId = "SaxPlayingSpider";
+            const gameTitle = document.getElementById('gameTitle').value;
+            const trophiesEarned = document.getElementById('trophiesEarned').value;
+            const totalTrophies = document.getElementById('totalTrophies').value;
+            const targetPage = document.getElementById('pageSelect').value;
+
+            if (gameTitle.trim() === "" || trophiesEarned === "" || totalTrophies === "") {
+                alert("Please fill in all fields.");
+                return;
+            }
+
+            let profileData = JSON.parse(localStorage.getItem(psnId)) || {
+                backlog: [],
+                inProgress: [], 
+                platinumed: []
+            };
+
+            const newGame = {
+                title: gameTitle,
+                earned: trophiesEarned,
+                total: totalTrophies,
+                timestamp: new Date().toLocaleString()
+            };
+
+            profileData[targetPage].push(newGame);
+            localStorage.setItem(psnId, JSON.stringify(profileData));
+
+            // Visual feedback
+            const btn = document.getElementById('saveBtn');
+            btn.innerText = "✓ SAVED!";
+            btn.classList.replace('bg-[#00439c]', 'bg-green-600');
+
+            setTimeout(() => {
+                btn.innerText = "Save to Collection";
+                btn.classList.replace('bg-green-600', 'bg-[#00439c]');
+                
+                // Clear Inputs
+                document.getElementById('gameTitle').value = "";
+                document.getElementById('trophiesEarned').value = "";
+                document.getElementById('totalTrophies').value = "";
+            }, 1500);
+        });
+    </script>
+</body>
+</html>
