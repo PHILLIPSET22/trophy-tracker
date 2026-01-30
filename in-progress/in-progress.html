@@ -96,14 +96,16 @@
             const newCount = document.getElementById(`input-${index}`).value;
             let data = JSON.parse(localStorage.getItem(psnId));
 
-            // Fixed typo: was neCount
             if (parseInt(newCount) > parseInt(data.inProgress[index].total)) {
                 alert("Earned trophies cannot exceed total trophies!");
                 return;
             }
 
-            // Fixed typo: was earend
             data.inProgress[index].earned = newCount;
+
+            const updatedGame = data.inProgress.splice(index, 1)[0];
+            data.inProgress.unshift(updatedGame);
+
             localStorage.setItem(psnId, JSON.stringify(data));
             displayProgress();
         };
