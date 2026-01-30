@@ -38,7 +38,6 @@
 
             if (data.inProgress && data.inProgress.length > 0) {
                 data.inProgress.forEach((game, index) => {
-                    // Calculate percentage for a progress bar
                     const percent = Math.round((game.earned / game.total) * 100) || 0;
                     
                     const gameDiv = document.createElement('div');
@@ -51,6 +50,9 @@
                                 <span class="text-[#0072ce] text-sm font-black tracking-tighter">${percent}% COMPLETE</span>
                             </div>
                             <div class="flex space-x-2">
+                                <button onclick="toggleEdit(${index})" class="px-3 py-1.5 bg-[#2a2a2c] text-blue-400 font-bold rounded hover:bg-blue-900 transition-all uppercase text-[10px]">
+                                    [Update]
+                                </button>
                                 <button onclick="moveToPlatinum(${index})" class="px-3 py-1.5 bg-[#1a1a1b] text-[#e2b007] border border-[#e2b007] font-bold rounded hover:bg-[#e2b007] hover:text-black transition-all uppercase text-[10px]">
                                     [Platinumed?]
                                 </button>
@@ -64,7 +66,7 @@
                             <label class="text-xs text-gray-500 uppercase font-bold block mb-2">New Trophy Count:</label>
                             <div class="flex space-x-2">
                                 <input type="number" id="input-${index}" value="${game.earned}" max="${game.total}"
-                                        class="bg-black border border-gray-700 rounded px-2 py-1 text0white w-24">
+                                        class="bg-black border border-gray-700 rounded px-2 py-1 text-white w-24 outline-none focus:border-blue-500">
                                 <button onclick="saveNewCount(${index})" class="bg-green-600 text-white px-3 py-1 rounded text-xs font-bold uppercase">Save</button>
                                 <button onclick="toggleEdit(${index})" class="bg-gray-800 text-white px-3 py-1 rounded text-xs font-bold uppercase">Cancel</button>
                             </div>
@@ -94,12 +96,14 @@
             const newCount = document.getElementById(`input-${index}`).value;
             let data = JSON.parse(localStorage.getItem(psnId));
 
-            if (parseInt(neCount) > parseInt(data.inProgress[index].total)) {
+            // Fixed typo: was neCount
+            if (parseInt(newCount) > parseInt(data.inProgress[index].total)) {
                 alert("Earned trophies cannot exceed total trophies!");
                 return;
             }
 
-            data.inProgress[index].earend = newCount;
+            // Fixed typo: was earend
+            data.inProgress[index].earned = newCount;
             localStorage.setItem(psnId, JSON.stringify(data));
             displayProgress();
         };
@@ -117,7 +121,6 @@
             let data = JSON.parse(localStorage.getItem(psnId));
             const gameToMove = data.inProgress.splice(index, 1)[0];
             
-            // Auto-complete trophies if moving to Platinum
             gameToMove.earned = gameToMove.total;
 
             if (!data.platinumed) data.platinumed = [];
