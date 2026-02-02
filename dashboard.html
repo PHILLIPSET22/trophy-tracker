@@ -40,7 +40,7 @@
             const globalEarned = allGames.reduce((sum, g) => sum + Number(g.earned || 0), 0);
             const globalTotal = allGames.reduce((sum, g) => sum + Number(g.total || 0), 0);
 
-            document.getElementById('header-stat').innerText = `TOTAL PROGRESS: ${globalEarned} / ${globalTotal} TROPHIES`;
+            document.getElementById('header-stat').innerText = `${data.platinumed.length} Games Platinumed!`;
 
             // Identify Latest Entries
             const lastB = data.backlog?.slice(-1)[0] || { title: "None", total: 0 };
@@ -63,7 +63,7 @@
                     <p class="label-tiny" style="color: var(--ps-gold);">Latest Platinum</p>
                     <p class="game-title" style="color: var(--ps-gold);">${lastPlat.title}</p>
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-top:5px;">
-                        <p class="label-tiny" style="color:white;">${lastPlat.earned} / ${lastPlat.total}</p>
+                        <p class="label-tiny" style="color:white;">${lastPlat.earned} / ${lastPlat.total} Trophies</p>
                         <p class="date-text" style="font-size:0.6rem;">${lastPlat.dateCompleted || ''}</p>
                     </div>
                 </div>
