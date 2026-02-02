@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Data Management - SaxPlayingSpider</title>
+    <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+    <nav class="nav-bar">
+        <a href="../index.html" class="nav-link">Dashboard</a>
+        <a href="../backlog/backlog.html" class="nav-link">Backlog</a>
+        <a href="../in-progress/in-progress.html" class="nav-link">In-Progress</a>
+        <a href="../platinums/platinums.html" class="nav-link">Platinumed</a>
+        <a href="../input-data/input-data.html" class="nav-link">Add Game</a>
+        <a href="data.html" class="nav-link active">Data</a>
+    </nav>
+
+    <main style="max-width: 600px; margin: 4rem auto; padding: 0 1rem;">
+        <h2 class="label-tiny" style="margin-bottom: 2rem;">System Backup & Restore</h2>
+        
+        <div class="glass-card" style="margin-bottom: 2rem;">
+            <p class="label-tiny" style="color: var(--ps-blue);">Backup Data</p>
+            <p style="font-size: 0.9rem; color: #aaa; margin-bottom: 1.5rem;">Download your entire trophy collection as a .json file.</p>
+            <button onclick="exportData()" class="btn" style="width:100%; background:var(--ps-blue); color:white;">Download Backup</button>
+        </div>
+
+        <div class="glass-card">
+            <p class="label-tiny" style="color: var(--ps-gold);">Restore Data</p>
+            <p style="font-size: 0.9rem; color: #aaa; margin-bottom: 1.5rem;">Upload a previously saved .json file to restore your progress.</p>
+            <input type="file" id="importFile" accept=".json" style="margin-bottom: 1rem; color: #888; font-size: 0.8rem;">
+            <button onclick="importData()" class="btn btn-plat" style="width:100%;">Upload & Restore</button>
+        </div>
+    </main>
+
+    <script>
+        const psnId = "SaxPlayingSpider";
+
+        // EXPORT LOGIC
+        function exportData() {
+            const data = localStorage.getItem(psnId);
+            if (!data) return alert("No data found to export!");
+
+            const blob = new Blob([data], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            
+            const timestamp = new Date().toISOString().split('T')[0];
+            a.href = url;
+            a.download = `Spider_Trophy_Backup_${timestamp}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // IMPORT LOGIC
+        function importData() {
+            const fileInput = document.getElementById('importFile');
+            const file = fileInput.files[0];
+
+            if (!file) return alert("Please select a file first!");
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    
+                    // Simple validation to check if it's the right format
+                    if (importedData.backlog || importedData.inProgress || importedData.platinumed) {
+                        if (confirm("This will overwrite your current browser data. Proceed?")) {
+                            localStorage.setItem(psnId, JSON.stringify(importedData));
+                            alert("Data Restored Successfully!");
+                            window.location.href = "../index.html";
+                        }
+                    } else {
+                        alert("Invalid file format.");
+                    }
+                } catch (err) {
+                    alert("Error reading file. Make sure it's a valid JSON.");
+                }
+            };
+            reader.readAsText(file);
+        }
+    </script>
+</body>
+</html>

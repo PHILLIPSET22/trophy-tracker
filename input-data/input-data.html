@@ -2,107 +2,71 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Game - SaxPlayingSpider</title>
     <link rel="stylesheet" href="../styles.css">
-    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        input, select {
+            width: 100%;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid var(--glass-border);
+            color: white;
+            padding: 0.8rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1.5rem;
+            outline: none;
+        }
+        input:focus { border-color: var(--ps-blue); }
+    </style>
 </head>
-<body class="bg-[#0a0a0a] text-[#f0f0f0]">
-
-    <header class="bg-gradient-to-br from-[#00439c] to-[#001e44] text-center py-10 px-4 shadow-2xl border-b border-[#0072ce]/30">
-        <h1 class="text-4xl font-extrabold italic tracking-widest text-white uppercase">Add Game Data</h1>
-        <p class="text-blue-300 mt-2 font-medium opacity-80">SaxPlayingSpider</p>
-    </header>
-
-    <nav class="bg-[#111] py-4 text-center border-b-2 border-[#00439c] mb-8">
-        <a href="../dashboard.html" class="text-[#a0a0a0] hover:text-[#0072ce] mx-4 font-bold uppercase text-xs tracking-widest transition-colors">Dashboard</a>
-        <a href="../backlog/backlog.html" class="text-[#a0a0a0] hover:text-[#0072ce] mx-4 font-bold uppercase text-xs tracking-widest transition-colors">Backlog</a>
-        <a href="../in-progress/in-progress.html" class="text-[#a0a0a0] hover:text-[#0072ce] mx-4 font-bold uppercase text-xs tracking-widest transition-colors">In-Progress</a>
-        <a href="../platinums/platinums.html" class="text-[#a0a0a0] hover:text-[#0072ce] mx-4 font-bold uppercase text-xs tracking-widest transition-colors">Platinumed</a>
+<body>
+    <nav class="nav-bar">
+        <a href="../index.html" class="nav-link">Dashboard</a>
+        <a href="../backlog/backlog.html" class="nav-link">Backlog</a>
+        <a href="../in-progress/in-progress.html" class="nav-link">In-Progress</a>
+        <a href="../platinums/platinums.html" class="nav-link">Platinumed</a>
+        <a href="input-data.html" class="nav-link active">Add Game</a>
     </nav>
 
-    <main class="max-w-xl mx-auto px-6">
-        <div class="bg-[#1a1a1b] p-8 rounded-2xl shadow-2xl border border-gray-800">
-            <div class="space-y-6">
-                <div>
-                    <label class="block text-xs font-black uppercase tracking-widest text-blue-400 mb-2">Game Title</label>
-                    <input type="text" id="gameTitle" placeholder="e.g. Elden Ring" 
-                        class="w-full bg-[#0a0a0a] border border-gray-800 rounded-lg p-3 text-white focus:border-[#0072ce] focus:ring-1 focus:ring-[#0072ce] outline-none transition-all">
-                </div>
+    <main style="max-width: 500px; margin: 4rem auto; padding: 0 1rem;">
+        <div class="glass-card">
+            <h2 class="label-tiny" style="margin-bottom: 1.5rem;">Register New Game</h2>
+            
+            <label class="label-tiny">Game Title</label>
+            <input type="text" id="title" placeholder="e.g. Elden Ring">
 
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-black uppercase tracking-widest text-blue-400 mb-2">Earned</label>
-                        <input type="number" id="trophiesEarned" placeholder="0" 
-                            class="w-full bg-[#0a0a0a] border border-gray-800 rounded-lg p-3 text-white focus:border-[#0072ce] outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-black uppercase tracking-widest text-blue-400 mb-2">Total</label>
-                        <input type="number" id="totalTrophies" placeholder="50" 
-                            class="w-full bg-[#0a0a0a] border border-gray-800 rounded-lg p-3 text-white focus:border-[#0072ce] outline-none">
-                    </div>
-                </div>
+            <label class="label-tiny">Total Trophies</label>
+            <input type="number" id="total" placeholder="50">
 
-                <div>
-                    <label class="block text-xs font-black uppercase tracking-widest text-blue-400 mb-2">Status</label>
-                    <select id="pageSelect" class="w-full bg-[#0a0a0a] border border-gray-800 rounded-lg p-3 text-white focus:border-[#0072ce] outline-none appearance-none">
-                        <option value="backlog">Backlog</option>
-                        <option value="inProgress">In-Progress</option>
-                        <option value="platinumed">Platinumed</option>
-                    </select>
-                </div>
+            <label class="label-tiny">Status</label>
+            <select id="status">
+                <option value="backlog">Backlog</option>
+                <option value="inProgress">In-Progress</option>
+            </select>
 
-                <button id="saveBtn" class="w-full bg-[#00439c] hover:bg-[#0072ce] text-white font-black py-4 rounded-xl shadow-lg shadow-blue-900/20 uppercase tracking-widest transition-all active:scale-95">
-                    Save to Collection
-                </button>
-            </div>
+            <button onclick="addGame()" class="btn" style="width:100%; background:var(--ps-blue); color:white; padding:1rem; font-size:0.8rem;">Add to Collection</button>
         </div>
     </main>
 
     <script>
-        document.getElementById('saveBtn').addEventListener('click', function() {
-            const psnId = "SaxPlayingSpider";
-            const gameTitle = document.getElementById('gameTitle').value;
-            const trophiesEarned = document.getElementById('trophiesEarned').value;
-            const totalTrophies = document.getElementById('totalTrophies').value;
-            const targetPage = document.getElementById('pageSelect').value;
+        const psnId = "SaxPlayingSpider";
 
-            if (gameTitle.trim() === "" || trophiesEarned === "" || totalTrophies === "") {
-                alert("Please fill in all fields.");
-                return;
-            }
+        function addGame() {
+            const title = document.getElementById('title').value;
+            const total = document.getElementById('total').value;
+            const status = document.getElementById('status').value;
 
-            let profileData = JSON.parse(localStorage.getItem(psnId)) || {
-                backlog: [],
-                inProgress: [], 
-                platinumed: []
-            };
+            if(!title || !total) return alert("Fill in the fields!");
 
-            const newGame = {
-                title: gameTitle,
-                earned: trophiesEarned,
-                total: totalTrophies,
-                timestamp: new Date().toLocaleString()
-            };
+            let data = JSON.parse(localStorage.getItem(psnId)) || { backlog: [], inProgress: [], platinumed: [] };
+            
+            const newGame = { title, total, earned: 0 };
+            data[status].push(newGame);
 
-            profileData[targetPage].push(newGame);
-            localStorage.setItem(psnId, JSON.stringify(profileData));
-
-            // Visual feedback
-            const btn = document.getElementById('saveBtn');
-            btn.innerText = "✓ SAVED!";
-            btn.classList.replace('bg-[#00439c]', 'bg-green-600');
-
-            setTimeout(() => {
-                btn.innerText = "Save to Collection";
-                btn.classList.replace('bg-green-600', 'bg-[#00439c]');
-                
-                // Clear Inputs
-                document.getElementById('gameTitle').value = "";
-                document.getElementById('trophiesEarned').value = "";
-                document.getElementById('totalTrophies').value = "";
-            }, 1500);
-        });
+            localStorage.setItem(psnId, JSON.stringify(data));
+            
+            alert(`${title} added to ${status}!`);
+            window.location.href = "../index.html"; // Back to Dashboard
+        }
     </script>
 </body>
 </html>

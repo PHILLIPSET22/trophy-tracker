@@ -2,98 +2,74 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - SaxPlayingSpider</title>
     <link rel="stylesheet" href="styles.css">
-    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-[#0a0a0a] text-[#f0f0f0] font-sans">
-
-    <header class="bg-gradient-to-br from-[#00439c] to-[#001e44] text-center py-10 px-4 shadow-2xl border-b border-[#0072ce]/30">
-        <h1 class="text-4xl font-extrabold italic tracking-tighter text-white uppercase mb-1">Trophy Tracker</h1>
-        <p id="platinum-count" class="text-blue-300 font-bold uppercase tracking-[0.2em] opacity-90 text-[10px]">Loading Platinums...</p>
+<body>
+    <header style="text-align:center; padding: 3rem 1rem;">
+        <h1 style="font-size: 3rem; font-style: italic; margin:0;">TROPHY TRACKER</h1>
+        <p id="platinum-count" class="label-tiny" style="color: var(--ps-blue);">Syncing Collection...</p>
     </header>
 
-    <nav class="bg-[#111] py-4 text-center border-b-2 border-[#00439c] sticky top-0 z-50 shadow-md">
-        <a href="index.html" class="text-white border-b-2 border-[#0072ce] pb-1 mx-4 font-black uppercase text-xs tracking-widest transition-all">Dashboard</a>
-        <a href="backlog/backlog.html" class="text-[#a0a0a0] hover:text-[#0072ce] mx-4 font-bold uppercase text-xs tracking-widest transition-colors">Backlog</a>
-        <a href="in-progress/in-progress.html" class="text-[#a0a0a0] hover:text-[#0072ce] mx-4 font-bold uppercase text-xs tracking-widest transition-colors">In-Progress</a>
-        <a href="platinums/platinums.html" class="text-[#a0a0a0] hover:text-[#0072ce] mx-4 font-bold uppercase text-xs tracking-widest transition-colors">Platinumed</a>
-        <a href="input-data/input-data.html" class="text-[#a0a0a0] hover:text-[#0072ce] mx-4 font-bold uppercase text-xs tracking-widest transition-colors">Add Game</a>
+    <nav class="nav-bar">
+        <a href="index.html" class="nav-link active">Dashboard</a>
+        <a href="backlog/backlog.html" class="nav-link">Backlog</a>
+        <a href="in-progress/in-progress.html" class="nav-link">In-Progress</a>
+        <a href="platinums/platinums.html" class="nav-link">Platinumed</a>
+        <a href="input-data/input-data.html" class="nav-link">Add Game</a>
+        <a href="data/data.html" class="nav-link">Data</a>
     </nav>
 
-    <section class="max-w-6xl mx-auto px-6 pt-8">
-        <div id="activity-ticker" class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            </div>
-    </section>
-
-    <main class="max-w-6xl mx-auto px-6 py-8">
-        <div class="border-t border-gray-900 pt-8">
-            <h2 class="text-xs font-black text-gray-500 uppercase tracking-[0.3em] mb-6 border-l-4 border-[#0072ce] pl-4 text-center md:text-left">Full Collection Stats</h2>
-            <div id="stats-counters" class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                </div>
-        </div>
-    </main>
-
-    <footer class="text-center py-10 border-t border-gray-900 mt-12">
-        <p class="text-gray-600 text-[10px] uppercase tracking-widest font-bold">SaxPlayingSpider // PSN Trophy System</p>
-    </footer>
+    <div style="max-width: 1100px; margin: 2rem auto; padding: 0 1rem;">
+        <div id="activity-ticker" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-bottom: 3rem;"></div>
+        
+        <div id="stats-counters" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem;"></div>
+    </div>
 
     <script>
+        const psnId = "SaxPlayingSpider";
         function updateDashboard() {
-            const psnId = "SaxPlayingSpider";
-            const rawData = localStorage.getItem(psnId);
-            const data = rawData ? JSON.parse(rawData) : { backlog: [], inProgress: [], platinumed: [] };
+            const data = JSON.parse(localStorage.getItem(psnId)) || { backlog: [], inProgress: [], platinumed: [] };
+            
+            // Logic for finding latest games
+            const lastB = data.backlog?.slice(-1)[0] || { title: "Empty" };
+            const lastP = data.inProgress?.[0] || { title: "None", earned: 0, total: 1 };
+            const lastPlat = data.platinumed?.slice(-1)[0] || { title: "None" };
 
-            const backlog = data.backlog || [];
-            const inProgress = data.inProgress || [];
-            const platinumed = data.platinumed || [];
+            document.getElementById('platinum-count').innerText = `${data.platinumed.length} PLATINUMS COLLECTED`;
 
-            // Update Header
-            document.getElementById('platinum-count').innerText = `Currently Has: ${platinumed.length} Platinums`;
-
-            // Identify Latest Items
-            const latestBacklog = backlog.length > 0 ? backlog[backlog.length - 1] : { title: "Empty" };
-            const latestProgress = inProgress.length > 0 ? inProgress[0] : { title: "None", earned: 0, total: 0 };
-            const latestPlatinum = platinumed.length > 0 ? platinumed[platinumed.length - 1] : { title: "None" };
-
-            // 1. Inject the Activity Ticker (Top Row)
             document.getElementById('activity-ticker').innerHTML = `
-                <div class="bg-[#111] p-4 rounded-xl border border-gray-800 flex flex-col justify-center">
-                    <p class="text-[9px] text-gray-500 uppercase font-black tracking-widest mb-1">Newest Backlog Addition</p>
-                    <p class="text-sm font-bold text-white truncate">${latestBacklog.title}</p>
+                <div class="glass-card">
+                    <p class="label-tiny">Newest Addition</p>
+                    <p class="game-title">${lastB.title}</p>
                 </div>
-                <div class="bg-[#001e44] p-4 rounded-xl border border-[#0072ce]/40 flex flex-col justify-center shadow-lg shadow-blue-900/10">
-                    <p class="text-[9px] text-blue-400 uppercase font-black tracking-widest mb-1">Recently Played</p>
-                    <div class="flex justify-between items-center">
-                        <p class="text-sm font-bold text-white truncate mr-2">${latestProgress.title}</p>
-                        <p class="text-[10px] font-black text-blue-300 whitespace-nowrap">${Math.round((latestProgress.earned / latestProgress.total * 100)) || 0}%</p>
-                    </div>
+                <div class="glass-card" style="border-top: 2px solid var(--ps-blue);">
+                    <p class="label-tiny" style="color: var(--ps-blue);">Current Grind</p>
+                    <p class="game-title">${lastP.title}</p>
+                    <p class="label-tiny" style="margin-top:5px;">${Math.round(lastP.earned/lastP.total*100) || 0}% Complete</p>
                 </div>
-                <div class="bg-[#111] p-4 rounded-xl border border-gray-800 flex flex-col justify-center">
-                    <p class="text-[9px] text-[#e2b007] uppercase font-black tracking-widest mb-1">Latest Platinum</p>
-                    <p class="text-sm font-bold text-[#e2b007] truncate">${latestPlatinum.title}</p>
+                <div class="glass-card" style="border-top: 2px solid var(--ps-gold);">
+                    <p class="label-tiny" style="color: var(--ps-gold);">Recent Legend</p>
+                    <p class="game-title" style="color: var(--ps-gold);">${lastPlat.title}</p>
                 </div>
             `;
 
-            // 2. Inject the Stat Counters (Main Bottom Section)
-            const totalGames = backlog.length + inProgress.length + platinumed.length;
+            const total = data.backlog.length + data.inProgress.length + data.platinumed.length;
             document.getElementById('stats-counters').innerHTML = `
-                <div class="p-8 bg-[#161617] rounded-2xl border border-gray-800/50 text-center">
-                    <p class="text-[10px] text-gray-500 uppercase font-black tracking-widest mb-2">Total Library</p>
-                    <p class="text-5xl font-black text-white">${totalGames}</p>
+                <div class="glass-card" style="text-align:center; padding: 3rem;">
+                    <p class="label-tiny">Total Library</p>
+                    <p style="font-size: 4rem; font-weight: 900; font-style: italic; margin:0;">${total}</p>
                 </div>
-                <div class="p-8 bg-[#161617] rounded-2xl border border-gray-800/50 text-center">
-                    <p class="text-[10px] text-gray-500 uppercase font-black tracking-widest mb-2">In Progress</p>
-                    <p class="text-5xl font-black text-[#0072ce]">${inProgress.length}</p>
+                <div class="glass-card" style="text-align:center; padding: 3rem;">
+                    <p class="label-tiny">In Progress</p>
+                    <p style="font-size: 4rem; font-weight: 900; font-style: italic; margin:0; color: var(--ps-blue);">${data.inProgress.length}</p>
                 </div>
-                <div class="p-8 bg-[#161617] rounded-2xl border border-gray-800/50 text-center">
-                    <p class="text-[10px] text-gray-500 uppercase font-black tracking-widest mb-2">Backlog</p>
-                    <p class="text-5xl font-black text-gray-400">${backlog.length}</p>
+                <div class="glass-card" style="text-align:center; padding: 3rem;">
+                    <p class="label-tiny">Backlog</p>
+                    <p style="font-size: 4rem; font-weight: 900; font-style: italic; margin:0; color: #555;">${data.backlog.length}</p>
                 </div>
             `;
         }
-
         updateDashboard();
     </script>
 </body>

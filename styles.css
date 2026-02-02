@@ -1,153 +1,93 @@
-/* --- Global Styles --- */
+/* --- GLOBAL THEME --- */
 :root {
-    --ps-dark: #0a0a0a;
-    --ps-card: #1a1a1b;
-    --ps-blue: #00439c;
-    --ps-light-blue: #0072ce;
-    --ps-text: #f0f0f0;
-    --ps-muted: #a0a0a0;
+    --ps-blue: #0072ce;
+    --ps-dark-blue: #001e44;
     --ps-gold: #e2b007;
-    --ps-danger: #ff4d4d;
+    --ps-red: #ff4d4d;
+    --bg-dark: #050505;
+    --glass: rgba(255, 255, 255, 0.03);
+    --glass-border: rgba(255, 255, 255, 0.1);
 }
 
 body {
-    background-color: var(--ps-dark);
-    color: var(--ps-text);
+    background: radial-gradient(circle at top right, var(--ps-dark-blue) 0%, var(--bg-dark) 50%);
+    background-attachment: fixed;
+    color: #f0f0f0;
     font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     margin: 0;
-    padding: 0;
-    line-height: 1.6;
+    min-h-screen: 100vh;
 }
 
-h1, h2, h3 {
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    font-weight: 800;
+/* --- COMPONENTS --- */
+.glass-card {
+    background: var(--glass);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    border-radius: 1.25rem;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
 }
 
-/* --- Header & Navigation --- */
-header {
-    background: linear-gradient(135deg, var(--ps-blue) 0%, #001e44 100%);
-    padding: 2rem 1rem;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+.glass-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--ps-blue);
+    background: rgba(255, 255, 255, 0.06);
 }
 
-nav {
-    background: #111;
+.nav-bar {
+    background: rgba(10, 10, 10, 0.8);
+    backdrop-filter: blur(10px);
     padding: 1rem;
     text-align: center;
     border-bottom: 2px solid var(--ps-blue);
-    margin-bottom: 2rem;
+    position: sticky;
+    top: 0;
+    z-index: 100;
 }
 
-nav a {
-    color: var(--ps-muted);
+.nav-link {
+    color: #a0a0a0;
     text-decoration: none;
-    margin: 0 15px;
-    font-weight: 600;
-    font-size: 0.9rem;
-    transition: color 0.3s ease;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    font-weight: 900;
+    letter-spacing: 0.15em;
+    margin: 0 1rem;
+    transition: color 0.3s;
 }
 
-nav a:hover {
-    color: var(--ps-light-blue);
+.nav-link:hover, .nav-link.active {
+    color: var(--ps-blue);
 }
 
-/* --- Game Cards (Lists) --- */
-#backlogContainer, #progressContainer, #platinumContainer {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 20px;
-}
-
-.game-item {
-    background: var(--ps-card);
-    border-left: 4px solid var(--ps-blue);
-    margin-bottom: 1rem;
-    padding: 1.5rem;
-    border-radius: 8px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-    transition: transform 0.2s ease;
-}
-
-.game-item:hover {
-    transform: translateX(5px);
-    border-left-color: var(--ps-light-blue);
-}
-
-.game-info {
-    flex-grow: 1;
+/* --- TEXT STYLES --- */
+.label-tiny {
+    font-size: 0.6rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: #777;
+    margin-bottom: 0.5rem;
 }
 
 .game-title {
-    font-size: 1.2rem;
-    font-weight: bold;
-    color: #fff;
-    display: block;
+    font-size: 1.25rem;
+    font-weight: 800;
+    margin: 0;
 }
 
-.game-stats {
-    font-size: 0.9rem;
-    color: var(--ps-muted);
-}
-
-/* --- Buttons --- */
-button {
-    background: #2a2a2c;
-    color: #fff;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: 700;
-    font-size: 0.75rem;
+/* --- BUTTONS --- */
+.btn {
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-weight: 900;
     text-transform: uppercase;
-    transition: background 0.2s ease;
-    margin-left: 10px;
+    font-size: 0.65rem;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
 }
 
-button:hover {
-    background: #444;
-}
-
-/* Specific Button Colors */
-.del-btn, button[onclick*="delete"] {
-    color: var(--ps-danger) !important;
-}
-
-button[onclick*="Platinumed"], button[onclick*="moveToPlatinum"] {
-    border: 1px solid var(--ps-gold);
-    color: var(--ps-gold);
-}
-
-button[onclick*="Platinumed"]:hover {
-    background: var(--ps-gold);
-    color: #000;
-}
-
-/* --- Forms (Input Page) --- */
-.input-group {
-    max-width: 500px;
-    margin: 20px auto;
-    background: var(--ps-card);
-    padding: 2rem;
-    border-radius: 12px;
-}
-
-input, select {
-    width: 100%;
-    padding: 12px;
-    margin: 10px 0 20px 0;
-    background: #000;
-    border: 1px solid #333;
-    color: #fff;
-    border-radius: 6px;
-}
-
-input:focus {
-    border-color: var(--ps-light-blue);
-    outline: none;
-}
+.btn-update { background: var(--ps-dark-blue); color: #4fa8ff; border: 1px solid #1e3a8a; }
+.btn-plat { background: transparent; color: var(--ps-gold); border: 1px solid var(--ps-gold); }
+.btn-delete { background: #222; color: var(--ps-red); }
