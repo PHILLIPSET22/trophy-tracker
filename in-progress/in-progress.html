@@ -42,9 +42,10 @@
                         <p class="game-title">${game.title}</p>
                         <p class="label-tiny" style="color:white; margin:0;">${game.earned} / ${game.total} Trophies</p>
                     </div>
-                    <div style="display: flex; gap: 0.5rem;">
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
                         <button onclick="updateCount(${index})" class="btn btn-update">Update Count</button>
                         <button onclick="moveToPlatinum(${index})" class="btn" style="background:var(--ps-gold); color:black; font-weight:bold; font-size:0.7rem; border-radius:4px; padding:0.5rem 1rem;">Move to Platinum</button>
+                        <button onclick="deleteGame(${index})" class="btn" style="background:rgba(255, 50, 50, 0.2); color:#ff9999; border: 1px solid rgba(255, 50, 50, 0.3); font-size:0.7rem; border-radius:4px; padding:0.5rem 1rem;">Delete</button>
                     </div>
                 `;
                 container.appendChild(div);
@@ -67,7 +68,6 @@
         window.moveToPlatinum = i => {
             let data = JSON.parse(localStorage.getItem(psnId));
             
-            // Just move the game with current stats and today's date
             const finishedGame = data.inProgress.splice(i, 1)[0];
             finishedGame.dateCompleted = new Date().toISOString().split('T')[0];
             
@@ -77,6 +77,17 @@
             localStorage.setItem(psnId, JSON.stringify(data));
             displayProgress();
             alert(`${finishedGame.title} moved to Platinumed page!`);
+        };
+
+        window.deleteGame = i => {
+            let data = JSON.parse(localStorage.getItem(psnId));
+            const gameTitle = data.inProgress[i].title;
+
+            if (confirm(`Are you sure you want to delete ${gameTitle}? This cannot be undone.`)) {
+                data.inProgress.splice(i, 1);
+                localStorage.setItem(psnId, JSON.stringify(data));
+                displayProgress();
+            }
         };
 
         displayProgress();
