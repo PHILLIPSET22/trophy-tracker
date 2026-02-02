@@ -8,7 +8,7 @@
 <body>
     <nav class="nav-bar">
         <a href="../dashboard.html" class="nav-link">Dashboard</a>
-        <a href="../backlog/backlog.html" class="nav-link">Backlog</a>
+        <a href="backlog.html" class="nav-link active">Backlog</a>
         <a href="../in-progress/in-progress.html" class="nav-link">In-Progress</a>
         <a href="../platinums/platinums.html" class="nav-link">Platinumed</a>
         <a href="../input-data/input-data.html" class="nav-link">Add Game</a>
@@ -16,61 +16,42 @@
     </nav>
 
     <main style="max-width: 800px; margin: 3rem auto; padding: 0 1rem;">
-        <h2 class="label-tiny" style="margin-bottom: 2rem;">Unplayed Collection</h2>
+        <h2 class="label-tiny">Unplayed Collection</h2>
         <div id="backlogContainer"></div>
     </main>
 
     <script>
         const psnId = "SaxPlayingSpider";
-
         function displayBacklog() {
             const data = JSON.parse(localStorage.getItem(psnId)) || { backlog: [] };
             const container = document.getElementById('backlogContainer');
             container.innerHTML = "";
 
-            if (data.backlog.length === 0) {
-                container.innerHTML = `<p class="label-tiny" style="text-align:center; opacity:0.5;">No games in backlog.</p>`;
-                return;
-            }
-
             data.backlog.forEach((game, index) => {
-                const gameDiv = document.createElement('div');
-                gameDiv.className = 'glass-card';
-                gameDiv.style.marginBottom = "1rem";
-                gameDiv.innerHTML = `
+                const div = document.createElement('div');
+                div.className = 'glass-card';
+                div.style.marginBottom = "1rem";
+                div.innerHTML = `
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <div>
                             <p class="game-title">${game.title}</p>
-                            <p class="label-tiny" style="margin:0;">Target: ${game.total} Trophies</p>
+                            <p class="label-tiny" style="margin:0; opacity:0.6;"> 0 / ${game.total} Trophies</p>
                         </div>
-                        <div style="display: flex; gap: 0.5rem;">
-                            <button onclick="startPlaying(${index})" class="btn btn-update" style="background:var(--ps-blue); color:white;">Start Game</button>
-                            <button onclick="deleteBacklog(${index})" class="btn btn-delete">Remove</button>
-                        </div>
+                        <button onclick="start(${index})" class="btn btn-update" style="background:var(--ps-blue); color:white;">Start Game</button>
                     </div>
                 `;
-                container.appendChild(gameDiv);
+                container.appendChild(div);
             });
         }
 
-        window.startPlaying = i => {
+        window.start = i => {
             let data = JSON.parse(localStorage.getItem(psnId));
             const game = data.backlog.splice(i, 1)[0];
             if(!data.inProgress) data.inProgress = [];
-            data.inProgress.unshift(game); // Put at top of "Current Grind"
+            data.inProgress.unshift(game);
             localStorage.setItem(psnId, JSON.stringify(data));
             displayBacklog();
         };
-
-        window.deleteBacklog = i => {
-            if(confirm("Remove from backlog?")) {
-                let data = JSON.parse(localStorage.getItem(psnId));
-                data.backlog.splice(i, 1);
-                localStorage.setItem(psnId, JSON.stringify(data));
-                displayBacklog();
-            }
-        };
-
         displayBacklog();
     </script>
 </body>

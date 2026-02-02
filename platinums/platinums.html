@@ -10,36 +10,78 @@
         <a href="../dashboard.html" class="nav-link">Dashboard</a>
         <a href="../backlog/backlog.html" class="nav-link">Backlog</a>
         <a href="../in-progress/in-progress.html" class="nav-link">In-Progress</a>
-        <a href="../platinums/platinums.html" class="nav-link">Platinumed</a>
+        <a href="platinums.html" class="nav-link active">Platinumed</a>
         <a href="../input-data/input-data.html" class="nav-link">Add Game</a>
         <a href="../data/data.html" class="nav-link">Data</a>
     </nav>
 
     <main style="max-width: 800px; margin: 3rem auto; padding: 0 1rem;">
-        <h2 class="label-tiny" style="margin-bottom: 2rem; color: var(--ps-gold);">🏆 Platinum Collection</h2>
-        <div id="platinumContainer" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem;"></div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <h2 class="label-tiny" style="margin:0; color: var(--ps-gold);">🏆 Platinum Collection</h2>
+            <button onclick="toggleSort()" id="sortBtn" class="btn btn-update" style="font-size:0.6rem;">Sort: Newest First</button>
+        </div>
+        <div id="platinumContainer"></div>
     </main>
 
     <script>
         const psnId = "SaxPlayingSpider";
+        let sortNewest = true;
+
+        function toggleSort() {
+            sortNewest = !sortNewest;
+            document.getElementById('sortBtn').innerText = sortNewest ? "Sort: Newest First" : "Sort: Oldest First";
+            displayPlats();
+        }
 
         function displayPlats() {
             const data = JSON.parse(localStorage.getItem(psnId)) || { platinumed: [] };
             const container = document.getElementById('platinumContainer');
             container.innerHTML = "";
 
-            data.platinumed.forEach(game => {
+            const sorted = data.platinumed.sort((a, b) => {
+                const dateA = new Date(a.dateCompleted).getTime() || 0;
+                const dateB = new Date(b.dateCompleted).getTime() || 0;
+                return sortNewest ? (dateB - dateA) : (dateA - dateB);
+            });
+
+            sorted.forEach((game, index) => {
                 const div = document.createElement('div');
                 div.className = 'glass-card';
+                div.style.marginBottom = "1rem";
                 div.style.borderLeft = "4px solid var(--ps-gold)";
                 div.innerHTML = `
-                    <p class="label-tiny" style="color:var(--ps-gold);">100% COMPLETED</p>
-                    <p class="game-title" style="color:var(--ps-gold);">${game.title}</p>
-                    <p class="label-tiny">${game.total} Trophies Total</p>
+                    <div style="display: flex; justify-content: space-between; align-items: start;">
+                        <div>
+                            <p class="game-title" style="color:var(--ps-gold); margin-bottom: 5px;">${game.title}</p>
+                            <p class="date-text" style="font-size:0.7rem; opacity:0.6;">Platinumed On: ${game.dateCompleted || 'N/A'}</p>
+                        </div>
+                        <div style="text-align: right;">
+                            <p class="label-tiny" style="color:white; margin:0 0 10px 0; font-size:0.9rem;">${game.earned} / ${game.total} Trophies</p>
+                            <button onclick="editPlatStats(${index})" class="btn" style="font-size: 0.6rem; padding: 4px 8px; background: rgba(255,255,255,0.1);">Edit Stats</button>
+                        </div>
+                    </div>
                 `;
                 container.appendChild(div);
             });
         }
+
+        window.editPlatStats = (i) => {
+            let data = JSON.parse(localStorage.getItem(psnId));
+            const game = data.platinumed[i];
+            
+            const newEarned = prompt(`Update trophies earned for ${game.title}:`, game.earned);
+            const newTotal = prompt(`Update total trophies for ${game.title} (including DLC):`, game.total);
+            const newDate = prompt(`Update completion date (YYYY-MM-DD):`, game.dateCompleted);
+
+            if (newEarned !== null && newTotal !== null && newDate !== null) {
+                data.platinumed[i].earned = newEarned;
+                data.platinumed[i].total = newTotal;
+                data.platinumed[i].dateCompleted = newDate;
+                localStorage.setItem(psnId, JSON.stringify(data));
+                displayPlats();
+            }
+        };
+
         displayPlats();
     </script>
 </body>

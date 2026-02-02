@@ -9,14 +9,14 @@
     <nav class="nav-bar">
         <a href="../dashboard.html" class="nav-link">Dashboard</a>
         <a href="../backlog/backlog.html" class="nav-link">Backlog</a>
-        <a href="../in-progress/in-progress.html" class="nav-link">In-Progress</a>
+        <a href="in-progress.html" class="nav-link active">In-Progress</a>
         <a href="../platinums/platinums.html" class="nav-link">Platinumed</a>
         <a href="../input-data/input-data.html" class="nav-link">Add Game</a>
         <a href="../data/data.html" class="nav-link">Data</a>
     </nav>
 
     <main style="max-width: 800px; margin: 3rem auto; padding: 0 1rem;">
-        <h2 class="label-tiny" style="margin-bottom: 2rem;">Current Trophy Grinds</h2>
+        <h2 class="label-tiny">Current Grinds</h2>
         <div id="progressContainer"></div>
     </main>
 
@@ -28,63 +28,55 @@
             const container = document.getElementById('progressContainer');
             container.innerHTML = "";
 
+            if (data.inProgress.length === 0) {
+                container.innerHTML = `<p class="label-tiny" style="text-align:center; opacity:0.5; margin-top: 3rem;">No active grinds.</p>`;
+                return;
+            }
+
             data.inProgress.forEach((game, index) => {
-                const percent = Math.round((game.earned / game.total) * 100) || 0;
-                const gameDiv = document.createElement('div');
-                gameDiv.className = 'glass-card';
-                gameDiv.style.marginBottom = "1.5rem";
-                
-                gameDiv.innerHTML = `
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
-                        <div>
-                            <p class="game-title">${game.title}</p>
-                            <p class="label-tiny" style="color: var(--ps-blue);">${percent}% Complete</p>
-                        </div>
-                        <div style="display: flex; gap: 0.5rem;">
-                            <button onclick="toggleEdit(${index})" class="btn btn-update">Update</button>
-                            <button onclick="moveToPlatinum(${index})" class="btn btn-plat">Platinum</button>
-                        </div>
+                const div = document.createElement('div');
+                div.className = 'glass-card';
+                div.style.marginBottom = "1.5rem";
+                div.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                        <p class="game-title">${game.title}</p>
+                        <p class="label-tiny" style="color:white; margin:0;">${game.earned} / ${game.total} Trophies</p>
                     </div>
-
-                    <div id="edit-area-${index}" style="display:none; margin-bottom: 1rem; padding: 1rem; background: rgba(0,0,0,0.3); border-radius: 0.5rem;">
-                        <input type="number" id="input-${index}" value="${game.earned}" style="background:#000; color:#fff; border:1px solid #444; padding: 5px; width: 60px;">
-                        <button onclick="saveNewCount(${index})" class="btn btn-update" style="background: var(--ps-blue); color:white;">Save</button>
-                    </div>
-
-                    <div style="width: 100%; bg: rgba(255,255,255,0.05); height: 4px; border-radius: 2px; overflow: hidden; background: #222;">
-                        <div style="width: ${percent}%; height: 100%; background: var(--ps-blue); transition: width 0.5s;"></div>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button onclick="updateCount(${index})" class="btn btn-update">Update Count</button>
+                        <button onclick="moveToPlatinum(${index})" class="btn" style="background:var(--ps-gold); color:black; font-weight:bold; font-size:0.7rem; border-radius:4px; padding:0.5rem 1rem;">Move to Platinum</button>
                     </div>
                 `;
-                container.appendChild(gameDiv);
+                container.appendChild(div);
             });
         }
 
-        window.toggleEdit = i => {
-            const el = document.getElementById(`edit-area-${i}`);
-            el.style.display = el.style.display === 'none' ? 'block' : 'none';
-        };
-
-        window.saveNewCount = i => {
+        window.updateCount = i => {
             let data = JSON.parse(localStorage.getItem(psnId));
-            const newCount = document.getElementById(`input-${i}`).value;
-            data.inProgress[i].earned = newCount;
+            const newEarned = prompt(`Update trophies earned for ${data.inProgress[i].title}:`, data.inProgress[i].earned);
+            const newTotal = prompt(`Update total trophies for ${data.inProgress[i].title}:`, data.inProgress[i].total);
             
-            // Move to top logic
-            const updated = data.inProgress.splice(i, 1)[0];
-            data.inProgress.unshift(updated);
-            
-            localStorage.setItem(psnId, JSON.stringify(data));
-            displayProgress();
+            if (newEarned !== null && newTotal !== null) {
+                data.inProgress[i].earned = newEarned;
+                data.inProgress[i].total = newTotal;
+                localStorage.setItem(psnId, JSON.stringify(data));
+                displayProgress();
+            }
         };
 
         window.moveToPlatinum = i => {
             let data = JSON.parse(localStorage.getItem(psnId));
-            const game = data.inProgress.splice(i, 1)[0];
-            game.earned = game.total;
+            
+            // Just move the game with current stats and today's date
+            const finishedGame = data.inProgress.splice(i, 1)[0];
+            finishedGame.dateCompleted = new Date().toISOString().split('T')[0];
+            
             if(!data.platinumed) data.platinumed = [];
-            data.platinumed.push(game);
+            data.platinumed.push(finishedGame);
+            
             localStorage.setItem(psnId, JSON.stringify(data));
             displayProgress();
+            alert(`${finishedGame.title} moved to Platinumed page!`);
         };
 
         displayProgress();
