@@ -34,18 +34,26 @@
             }
 
             data.inProgress.forEach((game, index) => {
+                const percent = game.total > 0 ? Math.round((game.earned / game.total) * 100) : 0;
+
                 const div = document.createElement('div');
                 div.className = 'glass-card';
                 div.style.marginBottom = "1.5rem";
                 div.innerHTML = `
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
                         <p class="game-title">${game.title}</p>
                         <p class="label-tiny" style="color:white; margin:0;">${game.earned} / ${game.total} Trophies</p>
                     </div>
+
+                    <div class="label-tiny" style="margin-bottom: 5px; opacity: 0.8;">Completion: ${percent}%</div>
+                    <div style="width: 100%; height: 8px; background: rgba(0,0,0,0.3); border-radius: 4px; margin-bottom: 1.5rem; overflow: hidden; border: 1px solid var(--glass-border);">
+                        <div style="width: ${percent}%; height: 100%; background: var(--ps-blue); box-shadow: 0 0 10px var(--ps-blue);"></div>
+                    </div>
+
                     <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
                         <button onclick="updateCount(${index})" class="btn btn-update">Update Count</button>
-                        <button onclick="moveToPlatinum(${index})" class="btn" style="background:var(--ps-gold); color:black; font-weight:bold; font-size:0.7rem; border-radius:4px; padding:0.5rem 1rem;">Move to Platinum</button>
-                        <button onclick="deleteGame(${index})" class="btn" style="background:rgba(255, 50, 50, 0.2); color:#ff9999; border: 1px solid rgba(255, 50, 50, 0.3); font-size:0.7rem; border-radius:4px; padding:0.5rem 1rem;">Delete</button>
+                        <button onclick="moveToPlatinum(${index})" class="btn" style="background:var(--ps-gold); color:black;">Move to Platinum</button>
+                        <button onclick="deleteGame(${index})" class="btn btn-delete">Delete</button>
                     </div>
                 `;
                 container.appendChild(div);
@@ -67,9 +75,9 @@
 
         window.moveToPlatinum = i => {
             let data = JSON.parse(localStorage.getItem(psnId));
-            
             const finishedGame = data.inProgress.splice(i, 1)[0];
             finishedGame.dateCompleted = new Date().toISOString().split('T')[0];
+            finishedGame.earned = finishedGame.total; // Ensure count is maxed
             
             if(!data.platinumed) data.platinumed = [];
             data.platinumed.push(finishedGame);
@@ -82,8 +90,7 @@
         window.deleteGame = i => {
             let data = JSON.parse(localStorage.getItem(psnId));
             const gameTitle = data.inProgress[i].title;
-
-            if (confirm(`Are you sure you want to delete ${gameTitle}? This cannot be undone.`)) {
+            if (confirm(`Are you sure you want to delete ${gameTitle}?`)) {
                 data.inProgress.splice(i, 1);
                 localStorage.setItem(psnId, JSON.stringify(data));
                 displayProgress();

@@ -16,12 +16,16 @@
     </nav>
 
     <main style="max-width: 800px; margin: 3rem auto; padding: 0 1rem;">
-        <h2 class="label-tiny">Unplayed Collection</h2>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h2 class="label-tiny" style="margin:0;">Unplayed Collection</h2>
+            <button onclick="sortBacklog()" class="btn btn-update">Sort A-Z</button>
+        </div>
         <div id="backlogContainer"></div>
     </main>
 
     <script>
         const psnId = "SaxPlayingSpider";
+
         function displayBacklog() {
             const data = JSON.parse(localStorage.getItem(psnId)) || { backlog: [] };
             const container = document.getElementById('backlogContainer');
@@ -37,12 +41,31 @@
                             <p class="game-title">${game.title}</p>
                             <p class="label-tiny" style="margin:0; opacity:0.6;"> 0 / ${game.total} Trophies</p>
                         </div>
-                        <button onclick="start(${index})" class="btn btn-update" style="background:var(--ps-blue); color:white;">Start Game</button>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button onclick="start(${index})" class="btn" style="background:var(--ps-blue); color:white;">Start Game</button>
+                            <button onclick="deleteBacklog(${index})" class="btn btn-delete">Delete</button>
+                        </div>
                     </div>
                 `;
                 container.appendChild(div);
             });
         }
+
+        window.sortBacklog = () => {
+            let data = JSON.parse(localStorage.getItem(psnId));
+            data.backlog.sort((a, b) => a.title.localeCompare(b.title));
+            localStorage.setItem(psnId, JSON.stringify(data));
+            displayBacklog();
+        };
+
+        window.deleteBacklog = i => {
+            let data = JSON.parse(localStorage.getItem(psnId));
+            if(confirm(`Remove ${data.backlog[i].title} from collection?`)) {
+                data.backlog.splice(i, 1);
+                localStorage.setItem(psnId, JSON.stringify(data));
+                displayBacklog();
+            }
+        };
 
         window.start = i => {
             let data = JSON.parse(localStorage.getItem(psnId));
@@ -52,6 +75,7 @@
             localStorage.setItem(psnId, JSON.stringify(data));
             displayBacklog();
         };
+
         displayBacklog();
     </script>
 </body>
