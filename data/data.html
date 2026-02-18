@@ -4,6 +4,32 @@
     <meta charset="UTF-8">
     <title>Data Management - SaxPlayingSpider</title>
     <link rel="stylesheet" href="../styles.css">
+    <style>
+        .danger-zone {
+            margin-top: 4rem;
+            padding: 2rem;
+            border: 1px solid rgba(255, 50, 50, 0.3);
+            background: rgba(255, 50, 50, 0.05);
+            border-radius: 0.5rem;
+            text-align: center;
+        }
+        .btn-wipe {
+            background: #ff3232;
+            color: white;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: 0.3s;
+        }
+        .btn-wipe:hover {
+            background: #ff0000;
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.4);
+        }
+    </style>
 </head>
 <body>
     <nav class="nav-bar">
@@ -13,73 +39,79 @@
         <a href="../in-progress/in-progress.html" class="nav-link">In-Progress</a>
         <a href="../platinums/platinums.html" class="nav-link">Platinumed</a>
         <a href="../input-data/input-data.html" class="nav-link">Add Game</a>
-        <a href="../data/data.html" class="nav-link">Data</a>
+        <a href="data.html" class="nav-link active">Data</a>
     </nav>
 
-    <main style="max-width: 600px; margin: 4rem auto; padding: 0 1rem;">
-        <h2 class="label-tiny" style="margin-bottom: 2rem;">System Backup & Restore</h2>
+    <main style="max-width: 800px; margin: 3rem auto; padding: 0 1rem;">
+        <h2 class="label-tiny">Data Backup & Restore</h2>
         
         <div class="glass-card" style="margin-bottom: 2rem;">
-            <p class="label-tiny" style="color: var(--ps-blue);">Backup Data</p>
-            <p style="font-size: 0.9rem; color: #aaa; margin-bottom: 1.5rem;">Download your entire trophy collection as a .json file.</p>
-            <button onclick="exportData()" class="btn" style="width:100%; background:var(--ps-blue); color:white;">Download Backup</button>
+            <p class="label-tiny">Export Data</p>
+            <p style="font-size: 0.8rem; opacity: 0.7; margin-bottom: 1rem;">Copy this code to backup your collection manually.</p>
+            <textarea id="dataBox" style="width:100%; height:150px; background:rgba(0,0,0,0.5); color:white; border:1px solid var(--glass-border); border-radius:4px; padding:10px; font-family:monospace; font-size:0.7rem;"></textarea>
+            <button onclick="copyData()" class="btn" style="margin-top:1rem; width:100%;">Copy to Clipboard</button>
         </div>
 
         <div class="glass-card">
-            <p class="label-tiny" style="color: var(--ps-gold);">Restore Data</p>
-            <p style="font-size: 0.9rem; color: #aaa; margin-bottom: 1.5rem;">Upload a previously saved .json file to restore your progress.</p>
-            <input type="file" id="importFile" accept=".json" style="margin-bottom: 1rem; color: #888; font-size: 0.8rem;">
-            <button onclick="importData()" class="btn btn-plat" style="width:100%;">Upload & Restore</button>
+            <p class="label-tiny">Import Data</p>
+            <p style="font-size: 0.8rem; opacity: 0.7; margin-bottom: 1rem;">Paste your backup code here to restore your collection.</p>
+            <textarea id="importBox" style="width:100%; height:100px; background:rgba(0,0,0,0.5); color:white; border:1px solid var(--glass-border); border-radius:4px; padding:10px;"></textarea>
+            <button onclick="importData()" class="btn btn-update" style="margin-top:1rem; width:100%;">Restore Backup</button>
+        </div>
+
+        <div class="danger-zone">
+            <h3 class="label-tiny" style="color: #ff3232; margin-bottom: 1rem;">Danger Zone</h3>
+            <p style="font-size: 0.8rem; opacity: 0.8; margin-bottom: 1.5rem;">
+                This will permanently delete all physical/digital backlogs, in-progress grinds, and your platinum collection. This cannot be undone.
+            </p>
+            <button onclick="wipeAllData()" class="btn-wipe">Wipe All Data</button>
         </div>
     </main>
 
     <script>
         const psnId = "SaxPlayingSpider";
 
-        // EXPORT LOGIC
-        function exportData() {
+        // Show current data for backup
+        function loadExport() {
             const data = localStorage.getItem(psnId);
-            if (!data) return alert("No data found to export!");
-
-            const blob = new Blob([data], { type: "application/json" });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            
-            const timestamp = new Date().toISOString().split('T')[0];
-            a.href = url;
-            a.download = `Spider_Trophy_Backup_${timestamp}.json`;
-            a.click();
-            URL.revokeObjectURL(url);
+            document.getElementById('dataBox').value = data || "No data found.";
         }
 
-        // IMPORT LOGIC
+        function copyData() {
+            const copyText = document.getElementById("dataBox");
+            copyText.select();
+            document.execCommand("copy");
+            alert("Backup code copied!");
+        }
+
         function importData() {
-            const fileInput = document.getElementById('importFile');
-            const file = fileInput.files[0];
-
-            if (!file) return alert("Please select a file first!");
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const importedData = JSON.parse(e.target.result);
-                    
-                    // Simple validation to check if it's the right format
-                    if (importedData.backlog || importedData.inProgress || importedData.platinumed) {
-                        if (confirm("This will overwrite your current browser data. Proceed?")) {
-                            localStorage.setItem(psnId, JSON.stringify(importedData));
-                            alert("Data Restored Successfully!");
-                            window.location.href = "../index.html";
-                        }
-                    } else {
-                        alert("Invalid file format.");
-                    }
-                } catch (err) {
-                    alert("Error reading file. Make sure it's a valid JSON.");
-                }
-            };
-            reader.readAsText(file);
+            const json = document.getElementById("importBox").value;
+            try {
+                JSON.parse(json);
+                localStorage.setItem(psnId, json);
+                alert("Data restored successfully!");
+                location.reload();
+            } catch(e) {
+                alert("Invalid data format!");
+            }
         }
+
+        // --- ADDED: Wipe Functionality ---
+        function wipeAllData() {
+            const confirm1 = confirm("Are you ABSOLUTELY sure? This will delete your entire collection history.");
+            if (confirm1) {
+                const confirm2 = prompt("To confirm, type 'DELETE' in the box below:");
+                if (confirm2 === "DELETE") {
+                    localStorage.removeItem(psnId);
+                    alert("System wiped. Starting fresh.");
+                    window.location.href = "../dashboard.html";
+                } else {
+                    alert("Wipe cancelled. The text did not match.");
+                }
+            }
+        }
+
+        loadExport();
     </script>
 </body>
 </html>
