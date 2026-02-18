@@ -74,10 +74,15 @@
         window.start = i => {
             let data = JSON.parse(localStorage.getItem(psnId));
             const game = data.physicalBacklog.splice(i, 1)[0];
+            
+            // --- UPDATED: Ensure the tag is attached when starting ---
+            game.storageType = "Physical";
+            
             if(!data.inProgress) data.inProgress = [];
             data.inProgress.unshift(game);
+            
             localStorage.setItem(psnId, JSON.stringify(data));
-            displayBacklog();
+            window.location.href = "../in-progress/in-progress.html";
         };
 
         displayBacklog();

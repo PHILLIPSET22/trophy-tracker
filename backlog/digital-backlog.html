@@ -74,10 +74,16 @@
         window.start = i => {
             let data = JSON.parse(localStorage.getItem(psnId));
             const game = data.digitalBacklog.splice(i, 1)[0];
+            
+            // --- ADDED: Tag as Digital before moving ---
+            game.storageType = "Digital";
+            
             if(!data.inProgress) data.inProgress = [];
             data.inProgress.unshift(game);
+            
             localStorage.setItem(psnId, JSON.stringify(data));
-            displayBacklog();
+            // Redirect to In-Progress to see the new game and badge
+            window.location.href = "../in-progress/in-progress.html";
         };
 
         displayBacklog();

@@ -36,13 +36,17 @@
 
             data.inProgress.forEach((game, index) => {
                 const percent = game.total > 0 ? Math.round((game.earned / game.total) * 100) : 0;
+                const storage = game.storageType;
 
                 const div = document.createElement('div');
                 div.className = 'glass-card';
                 div.style.marginBottom = "1.5rem";
                 div.innerHTML = `
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                        <p class="game-title">${game.title}</p>
+                        <div>
+                            <span class="label-tiny" style="background: ${storage === 'Physical' ? 'var(--ps-blue)' : '#444'}; color: white; padding: 2px 6px; border-radius: 4px; margin-right: 8px; font-size: 0.5rem; vertical-align: middle;">${storage.toUpperCase()}</span>
+                            <p class="game-title" style="display: inline-block; vertical-align: middle;">${game.title}</p>
+                        </div>
                         <p class="label-tiny" style="color:white; margin:0;">${game.earned} / ${game.total} Trophies</p>
                     </div>
 
@@ -78,7 +82,7 @@
             let data = JSON.parse(localStorage.getItem(psnId));
             const finishedGame = data.inProgress.splice(i, 1)[0];
             finishedGame.dateCompleted = new Date().toISOString().split('T')[0];
-            finishedGame.earned = finishedGame.total; // Ensure count is maxed
+            finishedGame.earned = finishedGame.total;
             
             if(!data.platinumed) data.platinumed = [];
             data.platinumed.push(finishedGame);

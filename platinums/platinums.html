@@ -39,7 +39,6 @@
             const container = document.getElementById('platinumContainer');
             container.innerHTML = "";
 
-            // Create a sorted copy
             const sorted = [...data.platinumed].sort((a, b) => {
                 const dateA = new Date(a.dateCompleted).getTime() || 0;
                 const dateB = new Date(b.dateCompleted).getTime() || 0;
@@ -47,9 +46,11 @@
             });
 
             sorted.forEach((game) => {
-                // Find the original index in the actual data array for deletion/editing
                 const originalIndex = data.platinumed.findIndex(g => g === game);
                 
+                // --- ADDED: Storage Logic ---
+                const storage = game.storageType || "Digital";
+
                 const div = document.createElement('div');
                 div.className = 'glass-card';
                 div.style.marginBottom = "1rem";
@@ -57,7 +58,8 @@
                 div.innerHTML = `
                     <div style="display: flex; justify-content: space-between; align-items: start;">
                         <div>
-                            <p class="game-title" style="color:var(--ps-gold); margin-bottom: 5px;">${game.title}</p>
+                            <span class="label-tiny" style="border: 1px solid var(--ps-gold); color: var(--ps-gold); padding: 1px 5px; border-radius: 3px; font-size: 0.5rem; vertical-align: middle; margin-right: 5px;">${storage.toUpperCase()}</span>
+                            <p class="game-title" style="color:var(--ps-gold); margin-bottom: 5px; display: inline-block; vertical-align: middle;">${game.title}</p>
                             <p class="date-text" style="font-size:0.7rem; opacity:0.6;">Platinumed On: ${game.dateCompleted || 'N/A'}</p>
                         </div>
                         <div style="text-align: right;">
@@ -77,14 +79,16 @@
             let data = JSON.parse(localStorage.getItem(psnId));
             const game = data.platinumed[i];
             
-            const newEarned = prompt(`Update trophies earned for ${game.title}:`, game.earned);
-            const newTotal = prompt(`Update total trophies for ${game.title} (including DLC):`, game.total);
+            const newEarned = prompt(`Update trophies earned:`, game.earned);
+            const newTotal = prompt(`Update total trophies:`, game.total);
             const newDate = prompt(`Update completion date (YYYY-MM-DD):`, game.dateCompleted);
+            const newStorage = prompt(`Update Storage Type (Physical/Digital):`, game.storageType || "Digital");
 
-            if (newEarned !== null && newTotal !== null && newDate !== null) {
+            if (newEarned !== null && newTotal !== null && newDate !== null && newStorage !== null) {
                 data.platinumed[i].earned = newEarned;
                 data.platinumed[i].total = newTotal;
                 data.platinumed[i].dateCompleted = newDate;
+                data.platinumed[i].storageType = newStorage;
                 localStorage.setItem(psnId, JSON.stringify(data));
                 displayPlats();
             }
