@@ -13,7 +13,8 @@
 
     <nav class="nav-bar">
         <a href="dashboard.html" class="nav-link active">Dashboard</a>
-        <a href="backlog/backlog.html" class="nav-link">Backlog</a>
+        <a href="backlog/physical-backlog.html" class="nav-link">Physical</a>
+        <a href="backlog/digital-backlog.html" class="nav-link">Digital</a>
         <a href="in-progress/in-progress.html" class="nav-link">In-Progress</a>
         <a href="platinums/platinums.html" class="nav-link">Platinumed</a>
         <a href="input-data/input-data.html" class="nav-link">Add Game</a>
@@ -26,33 +27,57 @@
         <div id="activity-ticker" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-bottom: 4rem;"></div>
         
         <h2 class="label-tiny" style="margin-bottom: 1rem; opacity: 0.8;">Collection Summary</h2>
-        <div id="stats-counters" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem;"></div>
+        <div id="stats-counters" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem;"></div>
     </div>
 
     <script>
         const psnId = "SaxPlayingSpider";
 
         function updateDashboard() {
-            const data = JSON.parse(localStorage.getItem(psnId)) || { backlog: [], inProgress: [], platinumed: [] };
-            
+            let data = JSON.parse(localStorage.getItem(psnId)) || { 
+                physicalBacklog: [], 
+                digitalBacklog: [], 
+                inProgress: [], 
+                platinumed: [] 
+            };
+
+            // --- DATA MIGRATION CHECK ---
+            // If user has old 'backlog' data, move it to digitalBacklog automatically
+            if (data.backlog) {
+                data.digitalBacklog = [...(data.digitalBacklog || []), ...data.backlog];
+                delete data.backlog;
+                localStorage.setItem(psnId, JSON.stringify(data));
+            }
+
             // Calculate Global Trophy Totals
-            const allGames = [...data.backlog, ...data.inProgress, ...data.platinumed];
+            const allGames = [
+                ...(data.physicalBacklog || []), 
+                ...(data.digitalBacklog || []), 
+                ...data.inProgress, 
+                ...data.platinumed
+            ];
             const globalEarned = allGames.reduce((sum, g) => sum + Number(g.earned || 0), 0);
             const globalTotal = allGames.reduce((sum, g) => sum + Number(g.total || 0), 0);
 
             document.getElementById('header-stat').innerText = `${data.platinumed.length} Games Platinumed!`;
 
             // Identify Latest Entries
-            const lastB = data.backlog?.slice(-1)[0] || { title: "None", total: 0 };
+            const lastPhys = data.physicalBacklog?.slice(-1)[0] || { title: "None", total: 0 };
+            const lastDigi = data.digitalBacklog?.slice(-1)[0] || { title: "None", total: 0 };
             const lastP = data.inProgress?.[0] || { title: "None", earned: 0, total: 0 };
             const lastPlat = data.platinumed?.sort((a,b) => new Date(b.dateCompleted) - new Date(a.dateCompleted))[0] || { title: "None", earned: 0, total: 0 };
 
             // BUILD LIVE FEED (Top Section)
             document.getElementById('activity-ticker').innerHTML = `
                 <div class="glass-card">
-                    <p class="label-tiny">Latest Backlog Addition</p>
-                    <p class="game-title">${lastB.title}</p>
-                    <p class="label-tiny" style="margin-top:5px; opacity:0.6;">0 / ${lastB.total} Trophies</p>
+                    <p class="label-tiny">Latest Physical Disc</p>
+                    <p class="game-title">${lastPhys.title}</p>
+                    <p class="label-tiny" style="margin-top:5px; opacity:0.6;">0 / ${lastPhys.total} Trophies</p>
+                </div>
+                <div class="glass-card">
+                    <p class="label-tiny">Latest Digital Add</p>
+                    <p class="game-title">${lastDigi.title}</p>
+                    <p class="label-tiny" style="margin-top:5px; opacity:0.6;">0 / ${lastDigi.total} Trophies</p>
                 </div>
                 <div class="glass-card" style="border-top: 2px solid var(--ps-blue);">
                     <p class="label-tiny" style="color: var(--ps-blue);">Last Played</p>
@@ -71,17 +96,25 @@
 
             // BUILD GLOBAL STATS (Bottom Section)
             document.getElementById('stats-counters').innerHTML = `
-                <div class="glass-card" style="text-align:center; padding: 2.5rem;">
-                    <p class="label-tiny">Trophies</p>
-                    <p style="font-size: 2.5rem; font-weight: 900; font-style: italic; margin:0;">${globalEarned} / ${globalTotal}</p>
+                <div class="glass-card" style="text-align:center;">
+                    <p class="label-tiny">Physical Backlog</p>
+                    <p style="font-size: 2.5rem; font-weight: 900; margin:0;">${data.physicalBacklog?.length || 0}</p>
                 </div>
-                <div class="glass-card" style="text-align:center; padding: 2.5rem;">
-                    <p class="label-tiny">Games In-Progress</p>
-                    <p style="font-size: 3.5rem; font-weight: 900; font-style: italic; margin:0; color: var(--ps-blue);">${data.inProgress.length}</p>
+                <div class="glass-card" style="text-align:center;">
+                    <p class="label-tiny">Digital Backlog</p>
+                    <p style="font-size: 2.5rem; font-weight: 900; margin:0;">${data.digitalBacklog?.length || 0}</p>
                 </div>
-                <div class="glass-card" style="text-align:center; padding: 2.5rem;">
-                    <p class="label-tiny">Games Platinumed</p>
-                    <p style="font-size: 3.5rem; font-weight: 900; font-style: italic; margin:0; color: var(--ps-gold);">${data.platinumed.length}</p>
+                <div class="glass-card" style="text-align:center;">
+                    <p class="label-tiny">In-Progress</p>
+                    <p style="font-size: 2.5rem; font-weight: 900; margin:0; color: var(--ps-blue);">${data.inProgress.length}</p>
+                </div>
+                <div class="glass-card" style="text-align:center;">
+                    <p class="label-tiny">Platinumed</p>
+                    <p style="font-size: 2.5rem; font-weight: 900; margin:0; color: var(--ps-gold);">${data.platinumed.length}</p>
+                </div>
+                <div class="glass-card" style="text-align:center; grid-column: 1 / -1;">
+                    <p class="label-tiny">Total Trophy Count</p>
+                    <p style="font-size: 2rem; font-weight: 900; font-style: italic; margin:0;">${globalEarned} / ${globalTotal}</p>
                 </div>
             `;
         }

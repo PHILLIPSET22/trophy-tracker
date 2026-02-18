@@ -16,15 +16,22 @@
             outline: none;
         }
         input:focus { border-color: var(--ps-blue); }
+        
+        /* Style the dropdown options for better visibility */
+        select option {
+            background: #1a1a1a;
+            color: white;
+        }
     </style>
 </head>
 <body>
     <nav class="nav-bar">
         <a href="../dashboard.html" class="nav-link">Dashboard</a>
-        <a href="../backlog/backlog.html" class="nav-link">Backlog</a>
+        <a href="../backlog/physical-backlog.html" class="nav-link">Physical</a>
+        <a href="../backlog/digital-backlog.html" class="nav-link">Digital</a>
         <a href="../in-progress/in-progress.html" class="nav-link">In-Progress</a>
         <a href="../platinums/platinums.html" class="nav-link">Platinumed</a>
-        <a href="../input-data/input-data.html" class="nav-link">Add Game</a>
+        <a href="../input-data/input-data.html" class="nav-link active">Add Game</a>
         <a href="../data/data.html" class="nav-link">Data</a>
     </nav>
 
@@ -38,10 +45,12 @@
             <label class="label-tiny">Total Trophies</label>
             <input type="number" id="total" placeholder="50">
 
-            <label class="label-tiny">Status</label>
+            <label class="label-tiny">Storage / Status</label>
             <select id="status">
-                <option value="backlog">Backlog</option>
+                <option value="physicalBacklog">Physical Backlog</option>
+                <option value="digitalBacklog">Digital Backlog</option>
                 <option value="inProgress">In-Progress</option>
+                <option value="platinumed">Platinumed</option>
             </select>
 
             <button onclick="addGame()" class="btn" style="width:100%; background:var(--ps-blue); color:white; padding:1rem; font-size:0.8rem;">Add to Collection</button>
@@ -53,19 +62,47 @@
 
         function addGame() {
             const title = document.getElementById('title').value;
-            const total = document.getElementById('total').value;
+            const total = parseInt(document.getElementById('total').value);
             const status = document.getElementById('status').value;
 
-            if(!title || !total) return alert("Fill in the fields!");
+            if(!title || !total) return alert("Please fill in all fields!");
 
-            let data = JSON.parse(localStorage.getItem(psnId)) || { backlog: [], inProgress: [], platinumed: [] };
+            // Fetch existing data or initialize structure
+            let data = JSON.parse(localStorage.getItem(psnId)) || { 
+                physicalBacklog: [], 
+                digitalBacklog: [], 
+                inProgress: [], 
+                platinumed: [] 
+            };
             
-            const newGame = { title, total, earned: 0 };
+            // Logic for different statuses
+            let earnedValue = 0;
+            let dateVal = null;
+
+            if (status === "platinumed") {
+                earnedValue = total;
+                dateVal = new Date().toISOString().split('T')[0];
+            }
+
+            const newGame = { 
+                title: title, 
+                total: total, 
+                earned: earnedValue,
+                dateCompleted: dateVal 
+            };
+
+            // Safety check: ensure the specific array exists
+            if (!data[status]) data[status] = [];
+            
+            // Add the game to the selected array
             data[status].push(newGame);
 
+            // Save back to local storage
             localStorage.setItem(psnId, JSON.stringify(data));
             
-            alert(`${title} added to ${status}!`);
+            alert(`${title} successfully added!`);
+            
+            // Refresh to clear inputs and allow next entry
             window.location.reload();
         }
     </script>

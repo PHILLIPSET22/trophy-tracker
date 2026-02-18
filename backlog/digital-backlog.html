@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Digital Backlog - SaxPlayingSpider</title>
+    <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+    <nav class="nav-bar">
+        <a href="../dashboard.html" class="nav-link">Dashboard</a>
+        <a href="physical-backlog.html" class="nav-link">Physical</a>
+        <a href="digital-backlog.html" class="nav-link active">Digital</a>
+        <a href="../in-progress/in-progress.html" class="nav-link">In-Progress</a>
+        <a href="../platinums/platinums.html" class="nav-link">Platinumed</a>
+        <a href="../input-data/input-data.html" class="nav-link">Add Game</a>
+        <a href="../data/data.html" class="nav-link">Data</a>
+    </nav>
+
+    <main style="max-width: 800px; margin: 3rem auto; padding: 0 1rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h2 class="label-tiny" style="margin:0;">Digital Collection</h2>
+            <button onclick="sortBacklog()" class="btn btn-update">Sort A-Z</button>
+        </div>
+        <div id="backlogContainer"></div>
+    </main>
+
+    <script>
+        const psnId = "SaxPlayingSpider";
+
+        function displayBacklog() {
+            const data = JSON.parse(localStorage.getItem(psnId)) || { digitalBacklog: [] };
+            const container = document.getElementById('backlogContainer');
+            container.innerHTML = "";
+
+            const list = data.digitalBacklog || [];
+
+            list.forEach((game, index) => {
+                const div = document.createElement('div');
+                div.className = 'glass-card';
+                div.style.marginBottom = "1rem";
+                div.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <p class="game-title">${game.title}</p>
+                            <p class="label-tiny" style="margin:0; opacity:0.6;"> 0 / ${game.total} Trophies</p>
+                        </div>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button onclick="start(${index})" class="btn" style="background:var(--ps-blue); color:white;">Start Game</button>
+                            <button onclick="deleteBacklog(${index})" class="btn btn-delete">Delete</button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        window.sortBacklog = () => {
+            let data = JSON.parse(localStorage.getItem(psnId));
+            if(!data.digitalBacklog) return;
+            data.digitalBacklog.sort((a, b) => a.title.localeCompare(b.title));
+            localStorage.setItem(psnId, JSON.stringify(data));
+            displayBacklog();
+        };
+
+        window.deleteBacklog = i => {
+            let data = JSON.parse(localStorage.getItem(psnId));
+            if(confirm(`Remove ${data.digitalBacklog[i].title} from collection?`)) {
+                data.digitalBacklog.splice(i, 1);
+                localStorage.setItem(psnId, JSON.stringify(data));
+                displayBacklog();
+            }
+        };
+
+        window.start = i => {
+            let data = JSON.parse(localStorage.getItem(psnId));
+            const game = data.digitalBacklog.splice(i, 1)[0];
+            if(!data.inProgress) data.inProgress = [];
+            data.inProgress.unshift(game);
+            localStorage.setItem(psnId, JSON.stringify(data));
+            displayBacklog();
+        };
+
+        displayBacklog();
+    </script>
+</body>
+</html>
