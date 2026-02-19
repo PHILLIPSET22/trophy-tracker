@@ -5,23 +5,13 @@
     <title>Add Game - SaxPlayingSpider</title>
     <link rel="stylesheet" href="../styles.css">
     <style>
-        input, select {
-            width: 100%;
-            background: rgba(0,0,0,0.5);
-            border: 1px solid var(--glass-border);
-            color: white;
-            padding: 0.8rem;
-            border-radius: 0.5rem;
-            margin-bottom: 1.5rem;
-            outline: none;
+        input, select { 
+            width: 100%; background: rgba(0,0,0,0.5); 
+            border: 1px solid var(--glass-border); color: white; 
+            padding: 0.8rem; border-radius: 0.5rem; 
+            margin-bottom: 1.5rem; outline: none; 
         }
-        input:focus { border-color: var(--ps-blue); }
-        
-        /* Style the dropdown options for better visibility */
-        select option {
-            background: #1a1a1a;
-            color: white;
-        }
+        .conditional-field { display: none; }
     </style>
 </head>
 <body>
@@ -31,79 +21,98 @@
         <a href="../backlog/digital-backlog.html" class="nav-link">Digital</a>
         <a href="../in-progress/in-progress.html" class="nav-link">In-Progress</a>
         <a href="../platinums/platinums.html" class="nav-link">Platinumed</a>
-        <a href="../input-data/input-data.html" class="nav-link active">Add Game</a>
+        <a href="input-data.html" class="nav-link active">Add Game</a>
         <a href="../data/data.html" class="nav-link">Data</a>
     </nav>
 
     <main style="max-width: 500px; margin: 4rem auto; padding: 0 1rem;">
         <div class="glass-card">
-            <h2 class="label-tiny" style="margin-bottom: 1.5rem;">Register New Game</h2>
+            <h2 class="label-tiny">Register New Game</h2>
             
             <label class="label-tiny">Game Title</label>
-            <input type="text" id="title" placeholder="e.g. Elden Ring">
+            <input type="text" id="title" placeholder="Game Title">
 
             <label class="label-tiny">Total Trophies</label>
-            <input type="number" id="total" placeholder="50">
+            <input type="number" id="total" placeholder="Total">
 
-            <label class="label-tiny">Storage / Status</label>
-            <select id="status">
+            <label class="label-tiny">Status</label>
+            <select id="status" onchange="toggleFields()">
                 <option value="physicalBacklog">Physical Backlog</option>
                 <option value="digitalBacklog">Digital Backlog</option>
                 <option value="inProgress">In-Progress</option>
                 <option value="platinumed">Platinumed</option>
             </select>
 
-            <button onclick="addGame()" class="btn" style="width:100%; background:var(--ps-blue); color:white; padding:1rem; font-size:0.8rem;">Add to Collection</button>
+            <div id="storageField" class="conditional-field">
+                <label class="label-tiny">Storage Type</label>
+                <select id="storageType">
+                    <option value="Digital">Digital</option>
+                    <option value="Physical">Physical</option>
+                </select>
+            </div>
+
+            <div id="earnedField" class="conditional-field">
+                <label class="label-tiny">Trophies Earned</label>
+                <input type="number" id="earned" value="0">
+            </div>
+
+            <div id="dateField" class="conditional-field">
+                <label class="label-tiny">Date Platinumed</label>
+                <input type="date" id="platDate">
+            </div>
+
+            <button onclick="addGame()" class="btn" style="width:100%; background:var(--ps-blue); color:white; padding:1rem;">Add Game</button>
         </div>
     </main>
 
     <script>
         const psnId = "SaxPlayingSpider";
 
+        function toggleFields() {
+            const status = document.getElementById('status').value;
+            const isWorking = (status === 'inProgress' || status === 'platinumed');
+            
+            document.getElementById('earnedField').style.display = isWorking ? 'block' : 'none';
+            document.getElementById('storageField').style.display = isWorking ? 'block' : 'none';
+            document.getElementById('dateField').style.display = (status === 'platinumed') ? 'block' : 'none';
+        }
+
         function addGame() {
             const title = document.getElementById('title').value;
             const total = parseInt(document.getElementById('total').value);
             const status = document.getElementById('status').value;
+            const earned = parseInt(document.getElementById('earned').value) || 0;
+            const platDate = document.getElementById('platDate').value;
+            const storageType = document.getElementById('storageType').value;
 
-            if(!title || !total) return alert("Please fill in all fields!");
+            if(!title || isNaN(total)) return alert("Fill in title and total trophies!");
 
-            // Fetch existing data or initialize structure
             let data = JSON.parse(localStorage.getItem(psnId)) || { 
-                physicalBacklog: [], 
-                digitalBacklog: [], 
-                inProgress: [], 
-                platinumed: [] 
+                physicalBacklog: [], digitalBacklog: [], inProgress: [], platinumed: [] 
             };
             
-            // Logic for different statuses
-            let earnedValue = 0;
-            let dateVal = null;
-
-            if (status === "platinumed") {
-                earnedValue = total;
-                dateVal = new Date().toISOString().split('T')[0];
-            }
+            // Determine Storage: 
+            // If backlog, it's implied by the selection. If active, use the dropdown.
+            let finalStorage = "Digital";
+            if(status === "physicalBacklog") finalStorage = "Physical";
+            else if(status === "inProgress" || status === "platinumed") finalStorage = storageType;
 
             const newGame = { 
                 title: title, 
                 total: total, 
-                earned: earnedValue,
-                dateCompleted: dateVal 
+                earned: earned,
+                storageType: finalStorage,
+                dateCompleted: (status === 'platinumed' ? platDate : null)
             };
 
-            // Safety check: ensure the specific array exists
-            if (!data[status]) data[status] = [];
+            // Ensure the array exists
+            if(!data[status]) data[status] = [];
             
-            // Add the game to the selected array
             data[status].push(newGame);
-
-            // Save back to local storage
             localStorage.setItem(psnId, JSON.stringify(data));
             
-            alert(`${title} successfully added!`);
-            
-            // Refresh to clear inputs and allow next entry
-            window.location.reload();
+            alert("Added!");
+            window.location.href = "../in-progress/in-progress.html";
         }
     </script>
 </body>

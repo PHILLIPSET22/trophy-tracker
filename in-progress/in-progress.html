@@ -10,7 +10,7 @@
         <a href="../dashboard.html" class="nav-link">Dashboard</a>
         <a href="../backlog/physical-backlog.html" class="nav-link">Physical</a>
         <a href="../backlog/digital-backlog.html" class="nav-link">Digital</a>
-        <a href="../in-progress/in-progress.html" class="nav-link">In-Progress</a>
+        <a href="../in-progress/in-progress.html" class="nav-link active">In-Progress</a>
         <a href="../platinums/platinums.html" class="nav-link">Platinumed</a>
         <a href="../input-data/input-data.html" class="nav-link">Add Game</a>
         <a href="../data/data.html" class="nav-link">Data</a>
@@ -25,18 +25,23 @@
         const psnId = "SaxPlayingSpider";
 
         function displayProgress() {
+            // Fetch data - using 'inProgress' key to match input-data.html
             const data = JSON.parse(localStorage.getItem(psnId)) || { inProgress: [] };
             const container = document.getElementById('progressContainer');
             container.innerHTML = "";
 
-            if (data.inProgress.length === 0) {
+            // Ensure we are accessing the correct array
+            const list = data.inProgress || [];
+
+            if (list.length === 0) {
                 container.innerHTML = `<p class="label-tiny" style="text-align:center; opacity:0.5; margin-top: 3rem;">No active grinds.</p>`;
                 return;
             }
 
-            data.inProgress.forEach((game, index) => {
+            list.forEach((game, index) => {
                 const percent = game.total > 0 ? Math.round((game.earned / game.total) * 100) : 0;
-                const storage = game.storageType;
+                // Use storageType from data, default to Digital if missing
+                const storage = game.storageType || "Digital";
 
                 const div = document.createElement('div');
                 div.className = 'glass-card';
@@ -45,7 +50,7 @@
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
                         <div>
                             <span class="label-tiny" style="background: ${storage === 'Physical' ? 'var(--ps-blue)' : '#444'}; color: white; padding: 2px 6px; border-radius: 4px; margin-right: 8px; font-size: 0.5rem; vertical-align: middle;">${storage.toUpperCase()}</span>
-                            <p class="game-title" style="display: inline-block; vertical-align: middle;">${game.title}</p>
+                            <p class="game-title" style="display: inline-block; vertical-align: middle; margin: 0;">${game.title}</p>
                         </div>
                         <p class="label-tiny" style="color:white; margin:0;">${game.earned} / ${game.total} Trophies</p>
                     </div>
@@ -68,11 +73,9 @@
         window.updateCount = i => {
             let data = JSON.parse(localStorage.getItem(psnId));
             const newEarned = prompt(`Update trophies earned for ${data.inProgress[i].title}:`, data.inProgress[i].earned);
-            const newTotal = prompt(`Update total trophies for ${data.inProgress[i].title}:`, data.inProgress[i].total);
             
-            if (newEarned !== null && newTotal !== null) {
-                data.inProgress[i].earned = newEarned;
-                data.inProgress[i].total = newTotal;
+            if (newEarned !== null) {
+                data.inProgress[i].earned = parseInt(newEarned);
                 localStorage.setItem(psnId, JSON.stringify(data));
                 displayProgress();
             }
@@ -81,8 +84,9 @@
         window.moveToPlatinum = i => {
             let data = JSON.parse(localStorage.getItem(psnId));
             const finishedGame = data.inProgress.splice(i, 1)[0];
+            
+            // Set completion date to today
             finishedGame.dateCompleted = new Date().toISOString().split('T')[0];
-            finishedGame.earned = finishedGame.total;
             
             if(!data.platinumed) data.platinumed = [];
             data.platinumed.push(finishedGame);
@@ -102,6 +106,7 @@
             }
         };
 
+        // Initialize the page display
         displayProgress();
     </script>
 </body>
