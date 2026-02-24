@@ -25,12 +25,10 @@
         const psnId = "SaxPlayingSpider";
 
         function displayProgress() {
-            // Fetch data - using 'inProgress' key to match input-data.html
             const data = JSON.parse(localStorage.getItem(psnId)) || { inProgress: [] };
             const container = document.getElementById('progressContainer');
             container.innerHTML = "";
 
-            // Ensure we are accessing the correct array
             const list = data.inProgress || [];
 
             if (list.length === 0) {
@@ -40,7 +38,6 @@
 
             list.forEach((game, index) => {
                 const percent = game.total > 0 ? Math.round((game.earned / game.total) * 100) : 0;
-                // Use storageType from data, default to Digital if missing
                 const storage = game.storageType || "Digital";
 
                 const div = document.createElement('div');
@@ -75,7 +72,15 @@
             const newEarned = prompt(`Update trophies earned for ${data.inProgress[i].title}:`, data.inProgress[i].earned);
             
             if (newEarned !== null) {
-                data.inProgress[i].earned = parseInt(newEarned);
+                // 1. Pull the game out of the array
+                const updatedGame = data.inProgress.splice(i, 1)[0];
+                
+                // 2. Update its value
+                updatedGame.earned = parseInt(newEarned);
+                
+                // 3. Put it at the very top (index 0)
+                data.inProgress.unshift(updatedGame);
+                
                 localStorage.setItem(psnId, JSON.stringify(data));
                 displayProgress();
             }
@@ -84,8 +89,6 @@
         window.moveToPlatinum = i => {
             let data = JSON.parse(localStorage.getItem(psnId));
             const finishedGame = data.inProgress.splice(i, 1)[0];
-            
-            // Set completion date to today
             finishedGame.dateCompleted = new Date().toISOString().split('T')[0];
             
             if(!data.platinumed) data.platinumed = [];
@@ -106,7 +109,6 @@
             }
         };
 
-        // Initialize the page display
         displayProgress();
     </script>
 </body>
