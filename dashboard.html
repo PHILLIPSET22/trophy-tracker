@@ -61,9 +61,21 @@
 
             document.getElementById('header-stat').innerText = `${data.platinumed.length} Games Platinumed!`;
 
-            // Identify Latest Entries
-            const lastPhys = data.physicalBacklog?.slice(-1)[0] || { title: "None", total: 0 };
-            const lastDigi = data.digitalBacklog?.slice(-1)[0] || { title: "None", total: 0 };
+            // Identify Latest Entries (by dateAdded timestamp, not array position)
+            const lastPhys = (data.physicalBacklog?.length > 0) 
+                ? data.physicalBacklog.reduce((latest, game) => {
+                    const gameDate = new Date(game.dateAdded || 0).getTime();
+                    const latestDate = new Date(latest.dateAdded || 0).getTime();
+                    return gameDate > latestDate ? game : latest;
+                  })
+                : { title: "None", total: 0 };
+            const lastDigi = (data.digitalBacklog?.length > 0)
+                ? data.digitalBacklog.reduce((latest, game) => {
+                    const gameDate = new Date(game.dateAdded || 0).getTime();
+                    const latestDate = new Date(latest.dateAdded || 0).getTime();
+                    return gameDate > latestDate ? game : latest;
+                  })
+                : { title: "None", total: 0 };
             const lastP = data.inProgress?.[0] || { title: "None", earned: 0, total: 0 };
             const lastPlat = data.platinumed?.sort((a,b) => new Date(b.dateCompleted) - new Date(a.dateCompleted))[0] || { title: "None", earned: 0, total: 0 };
 

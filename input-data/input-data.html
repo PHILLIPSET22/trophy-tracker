@@ -102,7 +102,8 @@
                 total: total, 
                 earned: earned,
                 storageType: finalStorage,
-                dateCompleted: (status === 'platinumed' ? platDate : null)
+                dateCompleted: (status === 'platinumed' ? platDate : null),
+                dateAdded: new Date().toISOString()
             };
 
             // Ensure the array exists
